@@ -1,26 +1,3 @@
-from src.V1 import MarkupGPT
-import tiktoken
-import pickle
-from config import access_token2 as access_token
-
-
-def load_pkl(file):
-    with open(file, 'rb') as f:
-        data = pickle.load(f)
-    return data
-
-data = load_pkl('data.pkl')[13113:13123]
-
-def num_tokens_from_string(string: str, encoding_name: str = "cl100k_base") -> int:
-    """Returns the number of tokens in a text string."""
-    encoding = tiktoken.get_encoding(encoding_name)
-    num_tokens = len(encoding.encode(string))
-    return num_tokens
-
-
-# bot = MarkupGPT(access_token)
-
-
 prompt = """
 Я буду предавать тебе фразы каждая новая строка = новая фраза!
 действуй как цикл, обрабатывай каждую фразу по очереди
@@ -70,45 +47,10 @@ prompt = """
 Если готов к работе, напиши <code: 200>
 """
 
-# bot.set_default_prompt(prompt)
-
-asks = [
-    'Обладаниесобственнымвидениемразвития проекта обоснованное профессиональнымопытом',
-    # 'я по жизни мечтатель, мечтаю вот не засиживаться',
-    ]
-
-def main(data: list):
-    dic = []
-    bot = MarkupGPT(access_token)
-    bot.enable_chat_mode()
-    while data:
-        i = data.pop() + '\n'
-        lens = num_tokens_from_string(i)
-        if lens >= 80:
-            print(i, lens, sep='\n')
-            bot.ask(prompt)
-            print(bot.ask(i))
-            bot.rollback_conversation(1)
-
-        else:
-            dic.append(i)
-        token_sum = sum(map(num_tokens_from_string, dic))
-        if token_sum > 80 or not data:
-            str_d = '\n'.join(dic)
-            dic.clear()
-            print(str_d, token_sum, sep='\n')
-            bot.ask(prompt)
-            print(bot.ask(str_d))
-            break
-
-            bot.rollback_conversation(2)
+def load_prompt(file):
+    with open(file, 'r', encoding='utf-8') as f:
+        data = f.read()
+    return data
 
 
-# for i in asks:
-#     resp = bot.ask(i)
-#     print(resp)
-
-if __name__ == "__main__":
-
-    main(data)
-    # print(data)
+print(load_prompt('prompt.txt'))

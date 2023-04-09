@@ -1,34 +1,83 @@
 from revChatGPT.V1 import Chatbot
+from typing import Union
 
 
 class MarkupGPT(object):
 
-    def __init__(self, access_token: str):
+    __conv_id = None
+    __default_prompt = ''
+
+    def __init__(
+        self, 
+        access_token: str,
+        chat_mode: bool = False,
+        ):
         self.__session = Chatbot(
             config={
                 "access_token": access_token,
             }
         )
+        self.__chat_mode = chat_mode
 
     def set_default_prompt(self, prompt: str = ""):
         self.__default_prompt = prompt + "\n"
 
-    def set_conversation_id(self, conversation_id: str):
-        self.__conversation_id = conversation_id
+    def enable_chat_mode(self):
+        self.__chat_mode = True
+
+    def disable_chat_mode(self):
+        self.__chat_mode = False
+
+    def new_chat(self):
+        self.__session.reset_chat()
+        # self.__del_conversation()
+        
+    def rollback_conversation(self, num: int = 1):
+        self.__session.rollback_conversation(num)
+
+    def __gen_title(self, message_id: str, convo_id: str | None = None):
+        if not convo_id:
+            convo_id = self.__conv_id
+        self.__session.gen_title(
+            convo_id=convo_id, 
+            message_id=message_id,
+            )
+
+    def __del_conversation(self):
+        self.__session.delete_conversation(convo_id=self.__conv_id)
+        self.__session.reset_chat()
+        self.__conv_id = None
+
 
     def __request(
         self,
         question: str,
         conversation_id: str | None = None,
-        dev: bool = False,
-        ):
-        resp = ""
-        prompt = question
+        use_prompt: bool = False,
+        logs: bool = False,
+        ) -> dict:
+
+        """
+        :Return dict
+            {
+                'message': message,
+                'message_id': message_id,
+                'conversation_id': conversation_id,
+                'parent_id': parent_id,
+                'model': model,
+            }
+        """
 
         if not conversation_id:
-            prompt = self.__default_prompt + prompt
+            conversation_id = self.__conv_id
 
-        print(f"question: {prompt}")
+        resp = {}
+        prompt = question
+        if logs:
+            print(f"question: {prompt}")
+
+        # if use_prompt:
+        prompt = self.__default_prompt + prompt
 
         raw_response = self.__session.ask(
             prompt=prompt,
@@ -38,15 +87,26 @@ class MarkupGPT(object):
         for data in raw_response:
             resp = data
 
-        if dev:
-            return resp
+        self.__conv_id = resp.get('conversation_id')
+
+        if self.__chat_mode:
+            self.__gen_title(resp.get('message_id'))
+        else:
+            self.__del_conversation()
 
         return resp
+    
+    def conversation_id(self):
+        return self.__conv_id
 
     def ask(
         self,
         question: str,
         conversation_id: str | None = None,
-        dev: bool = False,
-        ):
-        return self.__request(question, conversation_id, dev)
+        logs: bool = False,
+        ) -> str:
+        return self.__request(
+            question, 
+            conversation_id,
+            logs,
+            ).get('message')
