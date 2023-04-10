@@ -11,7 +11,7 @@ if __name__ == "__main__":
     data = load_pkl('data.pkl')
     # print(data[220100:220310])
 
-    for i in data[400:500]:
+    for i in data[4000:5000]:
         print(i)
 # lens = [(len(x), x) for x in data]
 # print(max(lens))
@@ -19,8 +19,8 @@ if __name__ == "__main__":
 #     lens.remove(max(lens))
 #     print(max(lens))
 
-def pickling(data, file):
-    with open(file, 'wb') as handle:
+def pickling(data, file, mode = 'ab+'):
+    with open(file, mode) as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 dt = [
