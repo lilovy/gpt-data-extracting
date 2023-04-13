@@ -1,12 +1,40 @@
 import openai
-from config import api_token
+from config import api_token, access_token2 as access_token
 import gradio as gr
 from prompts import load_prompt
+from src.V1 import MarkupGPT
+
+prmpt = """
+Изучите список требований к соискателям.
+Для каждого требования определите его тип (skill - навык, knowledge - знание, unknown - неизвестно).
+knowledge - это понимание того, как что-то работает или что-то означает.
+skill - это умение применять знания в практических ситуациях или выполнять определенные задачи с опытом и мастерством.
+Сформулируйте простую форму каждого требования, убрав из оригинала лишнее и избавившись от сложных конструкций. Если требование содержит несколько навыков/знаний, разделите их на отдельные строки.
+Укажите тип требования (skill/knowledge/unknown) и полученную простую форму в формате:
+{"original": "Оригинальный текст требования", "simple_forms": [{"simple_form": "Простая форма требования", "tag": "Тип требования"}]}.
+Повторите шаги 3-4 для всех требований в списке.
+Сохраните все данные в формате JSON.
+
+Я: 
+Знание adaptive, responsive верстки
+
+ChatGPT: 
+{"original": "Знание adaptive, responsive верстки", "simple_forms": [{"simple_form": "знание adaptive верстки", "tag": "knowledge"}, {"simple_form": "знание responsive верстки", "tag": "knowledge"}]}
+
+Я: 
+файер-вол, домен
+Проектные и мультимодальные перевозки;
+
+ChatGPT:
+{"original": "файер-вол, домен", "simple_forms": [{"simple_form": "файер-вол", "tag": "unknown"}, {"simple_form": "домен", "tag": "unknown"}]}, {"original": "Проектные и мультимодальные перевозки;", "simple_forms": [{"simple_form": "проектные перевозки", "tag": "skill"}, {"simple_form": "мультимодальные перевозки", "tag": "skill"}]}
+
+
+"""
 
 
 openai.api_key = api_token
 
-prompt = load_prompt('prompt_light.txt')
+prompt = load_prompt('prompt_light_v2.txt')
 
 
 def make_request(prompt, sys_prompt ):
@@ -25,9 +53,9 @@ def make_request(prompt, sys_prompt ):
 messages = [
     {"role": "system", "content": prompt},
     {"role": "user", "content": "Знание adaptive, responsive верстки"},
-    {"role": "assistant", "content": """{"original": "Знание adaptive, responsive верстки", "simple_form": ["знание adaptive верстки", "знание responsive верстки"], "tag": "knowledge"}"""},
+    {"role": "assistant", "content": """{"original": "Знание adaptive, responsive верстки", "simple_forms": [{"simple_form": "знание adaptive верстки", "tag": "knowledge"}, {"simple_form": "знание responsive верстки", "tag": "knowledge"}]}"""},
     {"role": "user", "content": "файер-вол, домен\nПроектные и мультимодальные перевозки;"},
-    {"role": "assistant", "content": """{"original": "файер-вол, домен", "simple_form": ["файер-вол", "домен"], "tag": "unknown"}, {"original": "Проектные и мультимодальные перевозки;", "simple_form": ["проектные перевозки", "мультимодальные перевозки"], "tag": "skill"}"""},
+    {"role": "assistant", "content": """{"original": "файер-вол, домен", "simple_forms": [{"simple_form": "файер-вол", "tag": "unknown"}, {"simple_form": "домен", "tag": "unknown"}]}, {"original": "Проектные и мультимодальные перевозки;", "simple_forms": [{"simple_form": "проектные перевозки", "tag": "skill"}, {"simple_form": "мультимодальные перевозки", "tag": "skill"}]}"""},
 ]
 
 def chatbot(input):
@@ -43,6 +71,12 @@ def chatbot(input):
         # messages.append({"role": "assistant", "content": reply})
         return reply
 
+
+def chatgpt_req(input):
+    if input:
+        bot = MarkupGPT(access_token)
+        bot.set_default_prompt(prmpt)
+        return bot.ask(input)
 
 def make_interface():
 

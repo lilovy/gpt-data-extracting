@@ -11,7 +11,7 @@ if __name__ == "__main__":
     data = load_pkl('data.pkl')
     # print(data[220100:220310])
 
-    for i in data[4000:5000]:
+    for i in data[400000:405000]:
         print(i)
 # lens = [(len(x), x) for x in data]
 # print(max(lens))
