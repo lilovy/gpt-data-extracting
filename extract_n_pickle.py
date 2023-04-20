@@ -55,7 +55,7 @@ def str_to_dict(data: str):
 dt = """
 {"original": "Английский на уровне чтения документации", "simple_forms": [{"simple_form": "английский на уровне чтения документации", "tag": "knowledge"}]}, {"original": "Навыки монтажа СКС", "simple_forms": [{"simple_form": "навыки монтажа СКС", "tag": "skill"}]}, {"original": "доброжелательность, общительность, мобильность", "simple_forms": [{"simple_form": "доброжелательность", "tag": "unknown"}, {"simple_form": "общительность", "tag": "unknown"}, {"simple_form": "мобильность", "tag": "unknown"}]}, {"original": "web container", "simple_forms": [{"simple_form": "web container", "tag": "knowledge"}]}, {"original": "представление хозяйственной деятельности предприятия,", "simple_forms": [{"simple_form": "представление хозяйственной деятельности предприятия", "tag": "knowledge"}]}, {"original": "Redmine/Jira,", "simple_forms": [{"simple_form": "Redmine", "tag": "knowledge"}, {"simple_form": "Jira", "tag": "knowledge"}]}, {"original": "Ищешь стабильную работу;", "simple_forms": [{"simple_form": "стабильная работа", "tag": "unknown"}]}, {"original": "Опыт создания аналитических отчетов;", "simple_forms": [{"simple_form": "опыт создания аналитических отчетов", "tag": "skill"}]}, {"original": "Владение Kotlin, coroutines", "simple_forms": [{"simple_form": "владение Kotlin", "tag": "skill"}, {"simple_form": "владение coroutines", "tag": "skill"}]}, {"original": "Желательно наличие сертификата 1С8", "simple_forms": [{"simple_form": "сертификат 1С8", "tag": "unknown"}]}, {"original": "Навыки верстки документов;", "simple_forms": [{"simple_form": "навыки верстки документов", "tag": "skill"}]}, {"original": "понимание системы процессов организации;", "simple_forms": [{"simple_form": "понимание системы процессов организации", "tag": "knowledge"}]}, {"original": "Владение русским - приветствуется.", "simple_forms": [{"simple_form": "владение русским", "tag": "knowledge"}]}, {"original": "Знакомство с вычислительной геометрией", "simple_forms": [{"simple_form": "знакомство с вычислительной геометрией", "tag": "knowledge"}]}, {"original": "Навыки программирование АТС", "simple_forms": [{"simple_form": "навыки программирования АТС", "tag": "skill"}]}, {"original": "Знание ПК- высокий уровень", "simple_forms": [{"simple_form": "знание ПК", "tag": "knowledge"}]}, {"original": "Архитектуры SAS Customer Intelligence Studio", "simple_forms": [{"simple_form": "архитектура SAS Customer Intelligence Studio", "tag": "knowledge"}]}, {"original": "наличие коммуникативных навыков;", "simple_forms": [{"simple_form": "коммуникативные навыки", "tag": "skill"}]}, {"original": "имеет аналитический склад ума.", "simple_forms": [{"simple_form": "аналитический склад ума", "tag": "skill"}]}, {"original": "Опыт работы с Mercurial", "simple_forms": [{"simple_form": "опыт работы с Mercurial", "tag": "skill"}]}"""
 
-def save_data(data, filename = 'res.txt'):
+def save_data(data, filename = 'result.txt'):
     with open(filename, 'a+', encoding='utf-8') as f:
         if isinstance(data, list):
             for i in data:
@@ -65,7 +65,7 @@ def save_data(data, filename = 'res.txt'):
             json.dump(data, f, ensure_ascii=False)
             f.write('\n')
 
-def extract_data(filename = 'res.txt'):
+def extract_data(filename = 'result.txt'):
     data = []
     with open(filename, 'r', encoding='utf-8') as f:
         for l in f:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     for i in data:
         print(i)
         break
-    save_data(data, 'results.txt')
+    save_data(data)
 
     # res = partial_request(data)
 
