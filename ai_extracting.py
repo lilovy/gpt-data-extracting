@@ -72,6 +72,9 @@ def chatbot(input):
         return reply
 
 
+# bot = MarkupGPT(access_token)
+# bot.set_default_prompt(prmpt)
+
 def chatgpt_req(input):
     if input:
         bot = MarkupGPT(access_token)
@@ -83,7 +86,7 @@ def make_interface():
     inputs = gr.inputs.Textbox(lines=7, label="Chat with AI")
     outputs = gr.outputs.Textbox(label="Reply")
 
-    gr.Interface(fn=chatbot, inputs=inputs, 
+    gr.Interface(fn=chatgpt_req, inputs=inputs, 
                 outputs=outputs, title="AI Chatbot",
                 description="Ask anything you want",
                 theme="compact").launch(share=True)
