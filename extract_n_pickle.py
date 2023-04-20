@@ -93,14 +93,16 @@ def partial_request(data: list[str], num: int = 20):
 
 
 if __name__ == "__main__":
-    # data = load_pkl('data.pkl')[200:500]
-    data = extract_data()
-    for i in data:
-        print(i)
-        break
-    save_data(data)
+    data = load_pkl('data.pkl')[20:40]
+    # data = extract_data()
+    # for i in data:
+    #     print(i)
+    #     break
+    # print(data)
+    # save_data(data)
 
-    # res = partial_request(data)
+    res = partial_request(data)
+    print(res)
 
     # for i in (extract_data()):
     #     print(i)

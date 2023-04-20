@@ -80,6 +80,7 @@ def chatgpt_req(input):
         bot = MarkupGPT(access_token)
         bot.set_default_prompt(prmpt)
         return bot.ask(input)
+        # return 'hi ' + input
 
 def make_interface():
 
@@ -89,7 +90,8 @@ def make_interface():
     gr.Interface(fn=chatgpt_req, inputs=inputs, 
                 outputs=outputs, title="AI Chatbot",
                 description="Ask anything you want",
-                theme="compact").launch(share=True)
+                # theme="compact"
+                ).launch(share=True)
 
 if __name__ == "__main__":
     make_interface()

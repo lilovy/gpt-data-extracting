@@ -1,0 +1,30 @@
+{"original": "Опыт программирования с использованием ООП", "simple_forms": [{"simple_form": "опыт программирования с использованием ООП", "tag": "skill"}]}
+{"original": "Знание PHP/Yii2.", "simple_forms": [{"simple_form": "знание PHP", "tag": "knowledge"}, {"simple_form": "знание Yii2", "tag": "knowledge"}]}
+{"original": "Понимание работы Terraform.", "simple_forms": [{"simple_form": "понимание работы Terraform", "tag": "knowledge"}]}
+{"original": "отличное знание Transact-SQL", "simple_forms": [{"simple_form": "отличное знание Transact-SQL", "tag": "knowledge"}]}
+{"original": "Знания бухгалтерских программ желательно;", "simple_forms": [{"simple_form": "знание бухгалтерских программ", "tag": "knowledge"}]}
+{"original": "Желательно знание C#,Visual ForPro.", "simple_forms": [{"simple_form": "желательно знание C#", "tag": "knowledge"}, {"simple_form": "желательно знание Visual ForPro", "tag": "knowledge"}]}
+{"original": "опыт обслуживания и администрирования", "simple_forms": [{"simple_form": "опыт обслуживания", "tag": "skill"}, {"simple_form": "опыт администрирования", "tag": "skill"}]}
+{"original": "понимание монетизационных особенностей F2P;", "simple_forms": [{"simple_form": "понимание монетизационных особенностей F2P", "tag": "knowledge"}]}
+{"original": "Unix-системами желательны", "simple_forms": [{"simple_form": "желательно знание Unix-систем", "tag": "knowledge"}]}
+{"original": "опыт построения хранилищ данных приветствуется", "simple_forms": [{"simple_form": "опыт построения хранилищ данных", "tag": "skill"}]}
+{"original": "Опыт разработки распределенных отказоустойчивых решений", "simple_forms": [{"simple_form": "опыт разработки распределенных отказоустойчивых решений", "tag": "skill"}]}
+{"original": "Оптимизм и доброжелательность;", "simple_forms": [{"simple_form": "оптимизм", "tag": "skill"}, {"simple_form": "доброжелательность", "tag": "skill"}]}
+{"original": "Действительно грамотный переговорщик.", "simple_forms": [{"simple_form": "грамотность в переговорах", "tag": "skill"}]}
+{"original": "MySQL, Java", "simple_forms": [{"simple_form": "знание MySQL", "tag": "knowledge"}, {"simple_form": "знание Java", "tag": "knowledge"}]}
+{"original": "Английский – чтение и письмо", "simple_forms": [{"simple_form": "английский чтение", "tag": "knowledge"}, {"simple_form": "английский письмо", "tag": "knowledge"}]}
+{"original": "GSM security analyst", "simple_forms": [{"simple_form": "GSM security analyst", "tag": "skill"}]}
+{"original": "Владение инструментами аналитика", "simple_forms": [{"simple_form": "владение инструментами аналитика", "tag": "skill"}]}
+{"original": "уметь быстро", "simple_forms": [{"simple_form": "быстрое выполнение", "tag": "skill"}]}
+{"original": "Знание принципов работы правил обмена", "simple_forms": [{"simple_form": "знание принципов работы правил обмена", "tag": "knowledge"}]}
+{"original": "Любовь к написанию документации", "simple_forms": [{"simple_form": "написание документации", "tag": "skill"}]}
+{"original": "Уверенное знание платформы Wordpress,", "simple_forms": [{"simple_form": "знание платформы Wordpress", "tag": "knowledge"}]}
+{"original": "Опыт работы с ZigBee приветствуется", "simple_forms": [{"simple_form": "опыт работы с ZigBee", "tag": "skill"}]}
+{"original": "Надежность, исполнительность, порядочность", "simple_forms": [{"simple_form": "надежность", "tag": "skill"}, {"simple_form": "исполнительность", "tag": "skill"}, {"simple_form": "порядочность", "tag": "skill"}]}
+{"original": "Знание Google Webmaster tools;", "simple_forms": [{"simple_form": "знание Google Webmaster tools", "tag": "knowledge"}]}
+{"original": "Знание платформы 1с8.2;", "simple_forms": [{"simple_form": "знание платформы 1с8.2", "tag": "knowledge"}]}
+{"original": "Готовы работать с возражениями;", "simple_forms": [{"simple_form": "работа с возражениями", "tag": "skill"}]}
+{"original": "Высшее, образование", "simple_forms": [{"simple_form": "высшее образование", "tag": "knowledge"}]}
+{"original": "Знание предметных областей автоматизации", "simple_forms": [{"simple_form": "знание предметных областей автоматизации", "tag": "knowledge"}]}
+{"original": "Phalcon / Zephir", "simple_forms": [{"simple_form": "Phalcon", "tag": "skill"}, {"simple_form": "Zephir", "tag": "skill"}]}
+{"original": "Навык решения сложных задач", "simple_forms": [{"simple_form": "решение сложных задач", "tag": "skill"}]}
