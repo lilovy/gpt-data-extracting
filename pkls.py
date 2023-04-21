@@ -1,18 +1,22 @@
 import pickle
+from timer import timer
 
-
+@timer
 def load_pkl(file):
     with open(file, 'rb') as f:
         data = pickle.load(f)
     return data
 
+data = load_pkl('src/.localdata/data.pkl')
 
 if __name__ == "__main__":
-    data = load_pkl('data.pkl')
+    # data = load_pkl('src/.localdata/data.pkl')
     # print(data[220100:220310])
+    print(len(data))
+    print(data[:100])
 
-    for i in data[400000:405000]:
-        print(i)
+    # for i in data[400000:405000]:
+    #     print(i)
 # lens = [(len(x), x) for x in data]
 # print(max(lens))
 # for i in range(40):
