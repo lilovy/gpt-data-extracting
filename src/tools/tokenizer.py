@@ -1,9 +1,6 @@
 import tiktoken
 
 
-encoding = tiktoken.get_encoding("cl100k_base")
-encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
-
 phrase = """
 наличие коммуникативных навыков;
 имеет аналитический склад ума.
@@ -107,16 +104,14 @@ OSI L2-L4;
 Знание Umbraco;
 """
 
-encoding.encode("tiktoken is great!")
 
-
-def num_tokens_from_string(string: str, encoding_name: str) -> int:
+def num_tokens_from_string(string: str, model_name: str) -> int:
     """Returns the number of tokens in a text string."""
-    encoding = tiktoken.get_encoding(encoding_name)
+    encoding = tiktoken.encoding_for_model(model_name)
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
 
-counts = num_tokens_from_string(phrase, "cl100k_base")
-
-print(counts)
+if __name__ == "__main__":
+    counts = num_tokens_from_string(phrase, "gpt-3.5-turbo")
+    print(counts)
