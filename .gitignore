@@ -152,6 +152,7 @@ cython_debug/
 #.idea/
 
 
-src/.localdata
+.localdata
 results/.database
 results/.files
+flagged
