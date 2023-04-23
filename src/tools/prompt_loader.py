@@ -1,5 +1,9 @@
 
 class LoadPrompt(object):
+    """
+    return PromptFile's data
+    """
+    
     def __init__(
         self,
         prompt_file: str,
