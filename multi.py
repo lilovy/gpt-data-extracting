@@ -3,8 +3,8 @@ import multiprocessing
 
 def multi_process(
     func,
-    data: list = load_data(),
-    processes: int = 100,
+    data: list,
+    processes: int = 2,
     ):
     print('start parsing!')
     with multiprocessing.Pool(processes=processes) as pool:
