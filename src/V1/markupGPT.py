@@ -10,32 +10,41 @@ class MarkupGPT(object):
     def __init__(
         self, 
         access_token: str,
+        proxy: str = None,
         chat_mode: bool = False,
-        ):
+        ) -> None:
+
+        config = {
+            "access_token": access_token,
+        }
+        if isinstance(proxy, str):
+            config["proxy"] = proxy
+
         self.__session = Chatbot(
-            config={
-                "access_token": access_token,
-            }
+            config=config,
         )
         self.__chat_mode = chat_mode
 
-    def set_default_prompt(self, prompt: str = ""):
+    def set_default_prompt(self, prompt: str = "") -> None:
         self.__default_prompt = prompt + "\n"
 
-    def enable_chat_mode(self):
+    def enable_chat_mode(self) -> None:
         self.__chat_mode = True
 
-    def disable_chat_mode(self):
+    def disable_chat_mode(self) -> None:
         self.__chat_mode = False
 
-    def new_chat(self):
+    def new_chat(self) -> None:
         self.__session.reset_chat()
-        # self.__del_conversation()
-        
+
     def rollback_conversation(self, num: int = 1):
         self.__session.rollback_conversation(num)
 
-    def __gen_title(self, message_id: str, convo_id: str | None = None):
+    def __gen_title(
+        self, 
+        message_id: str, 
+        convo_id: str | None = None,
+        ) -> None:
         if not convo_id:
             convo_id = self.__conv_id
         self.__session.gen_title(
@@ -43,7 +52,7 @@ class MarkupGPT(object):
             message_id=message_id,
             )
 
-    def __del_conversation(self):
+    def __del_conversation(self) -> None:
         self.__session.delete_conversation(convo_id=self.__conv_id)
         self.__session.reset_chat()
         self.__conv_id = None

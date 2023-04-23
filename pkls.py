@@ -1,5 +1,7 @@
 import pickle
 from timer import timer
+import pandas as pd
+from pandas import DataFrame
 
 @timer
 def load_pkl(file):
@@ -7,13 +9,18 @@ def load_pkl(file):
         data = pickle.load(f)
     return data
 
-data = load_pkl('src/.localdata/data.pkl')
+@timer
+def load_pkl_pandas(file) -> DataFrame:
+    df = pd.read_pickle(file)
+    return df
+
+# data = load_pkl_pandas('src/.localdata/data.pkl')
 
 if __name__ == "__main__":
     # data = load_pkl('src/.localdata/data.pkl')
     # print(data[220100:220310])
     print(len(data))
-    print(data[:100])
+    print(data.head(50))
 
     # for i in data[400000:405000]:
     #     print(i)
