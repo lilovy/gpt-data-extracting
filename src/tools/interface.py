@@ -1,9 +1,23 @@
 import gradio as gr
+from src.tools import timer
 
 
 def hello(input):
     if input:
         return f"Hi {input}"
+
+@timer
+def get_data_from_interface(data):
+    resp = requests.post(
+        "http://127.0.0.1:7860/run/predict", 
+        json={
+            "data": [
+                data,
+                ]
+            },
+        ).json()
+    data = resp["data"]
+    return data
 
 def make_interface(func):
 
@@ -14,7 +28,3 @@ def make_interface(func):
                 outputs=outputs, title="AI Chatbot",
                 description="Ask anything you want",
                 ).launch(share=True)
-
-
-if __name__ == "__main__":
-    make_interface(hello)
