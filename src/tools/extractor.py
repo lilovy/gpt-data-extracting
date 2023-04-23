@@ -4,14 +4,18 @@ from config import (
     access_token2 as access_token,
     )
 from src.tools import LoadPrompt
+from src.tools import get_proxy
+from src.tools import FindDict
+
 from src.V1 import MarkupGPT
+# from src.tools.database import get_data
 
 
 class GPTResponser(object):
     def __init__(
         self, 
         token: str,
-        prompt: str = None,
+        prompt: str | list[dict] = None,
         proxy: str = None, 
         ) -> None:
 
@@ -30,6 +34,8 @@ class GPTResponser(object):
             return self.__unofficial_request(question)
 
         if isinstance(question, list):
+            if self.prompt != "":
+                question = self.prompt + question
             return self.__official_request(question)
 
     @property
@@ -57,6 +63,36 @@ class GPTResponser(object):
             proxy=self.__proxy,
             )
         return resp.ask(question)
+
+
+def combine(token):
+    prompt = LoadPrompt('prompts/prompt_extract_data.txt')
+    proxy = get_proxy()
+    num = 20
+    data: list = get_data(used=False, num=num)
+
+    while len(data) > 0:
+        texts = []
+        ids = []
+        for id, text in data:
+            ids.append(id)
+            texts.append(text)
+        str_data = '\n'.join(texts)
+
+        try:
+            resp = GPTResponser(token, prompt=prompt, proxy=proxy).ask(str_data)
+
+        except Exception as e:
+            print(e)
+
+        dicts = FindDict(resp)
+        if len(dicts) != num:
+            save_bad_request(dicts)
+        else:
+            result = list(zip(ids, dicts))
+            save_result(result)
+
+        data: list = get_data(used=False, num=num)
 
 
 def msg(prompt):

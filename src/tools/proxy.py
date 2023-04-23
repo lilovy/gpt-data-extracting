@@ -1,4 +1,5 @@
 from lxml import html
+from random import choice
 import requests
 
 
@@ -16,7 +17,7 @@ def proxy_list(
     ip: str = ip,
     port: str = port,
     protocol: str = protocol,
-    ) -> list[tuple[str, str]]:
+    ) -> list[dict]:
 
     resp = requests.get(url)
     tree = html.fromstring(resp.content)
@@ -30,5 +31,9 @@ def proxy_list(
     return proxy
 
 
+def get_proxy() -> str:
+    return choice(proxy_list()).get('proxy')
+
 if __name__ == "__main__":
-    print(proxy_list())
+    print(get_proxy())
+    # print(proxy_list())
