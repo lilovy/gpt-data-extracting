@@ -20,7 +20,7 @@ def pickling(data, file, mode = 'ab+'):
 
 
 if __name__ == "__main__":
-    # data = load_pkl('.localdata/data_500k.pkl')
+    data = load_pkl('.localdata/data_500k.pkl')
     # print(data[220100:220310])
     print(len(data))
-    print(data.head(50))
+    # print(data.head(50))

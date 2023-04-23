@@ -59,13 +59,14 @@ class GPTResponser(object):
         return resp.ask(question)
 
 
-messages = [
-    {"role": "system", "content": prompt},
-    {"role": "user", "content": "Знание adaptive, responsive верстки"},
-    {"role": "assistant", "content": """{"original": "Знание adaptive, responsive верстки", "simple_forms": [{"simple_form": "знание adaptive верстки", "tag": "knowledge"}, {"simple_form": "знание responsive верстки", "tag": "knowledge"}]}"""},
-    {"role": "user", "content": "файер-вол, домен\nПроектные и мультимодальные перевозки;"},
-    {"role": "assistant", "content": """{"original": "файер-вол, домен", "simple_forms": [{"simple_form": "файер-вол", "tag": "unknown"}, {"simple_form": "домен", "tag": "unknown"}]}, {"original": "Проектные и мультимодальные перевозки;", "simple_forms": [{"simple_form": "проектные перевозки", "tag": "skill"}, {"simple_form": "мультимодальные перевозки", "tag": "skill"}]}"""},
-]
+def msg(prompt):
+    return [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": "Знание adaptive, responsive верстки"},
+        {"role": "assistant", "content": """{"original": "Знание adaptive, responsive верстки", "simple_forms": [{"simple_form": "знание adaptive верстки", "tag": "knowledge"}, {"simple_form": "знание responsive верстки", "tag": "knowledge"}]}"""},
+        {"role": "user", "content": "файер-вол, домен\nПроектные и мультимодальные перевозки;"},
+        {"role": "assistant", "content": """{"original": "файер-вол, домен", "simple_forms": [{"simple_form": "файер-вол", "tag": "unknown"}, {"simple_form": "домен", "tag": "unknown"}]}, {"original": "Проектные и мультимодальные перевозки;", "simple_forms": [{"simple_form": "проектные перевозки", "tag": "skill"}, {"simple_form": "мультимодальные перевозки", "tag": "skill"}]}"""},
+        ]
 
 def resp(token, messages: str | list[dict], proxy: str = None, prompt: str = None):
     response = GPTResponser(token, proxy=proxy, prompt=prompt)
@@ -80,5 +81,5 @@ if __name__ == "__main__":
     print(resp(access_token, question))
 
     prompt = LoadPrompt('prompts/prompt_light_v2.txt')
-    messages += {"role": "user", "content": cont}
+    messages = msg(prompt) + {"role": "user", "content": cont}
     print(resp(api_token, messages, prompt=prompt))
