@@ -4,15 +4,6 @@ from tqdm import *
 import time
 
 
-def timer(func):
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        print(f"Время выполнения функции {func.__name__}: {end_time - start_time:.5f} секунд")
-        return result
-    return wrapper
-
 Base = declarative_base()
 
 class DBHelper:
@@ -31,7 +22,6 @@ class DBHelper:
             session.add_all(list_save_data)
             session.commit()
  
-    @timer
     def insert_result_data(self, data: list, list_save_data: list):
           with self.__Session() as session:
             for tuple_ in tqdm(data, total=len(data)):
@@ -39,7 +29,20 @@ class DBHelper:
                 values = dict_.get('simple_forms')
                 list_object_rows = []
                 for value in values:
-                    object_row = Result(text=value['simple_form'], tag=value['tag'], row_id=tuple_[0])
+                    object_row = ResultData(text=value['simple_form'], tag=value['tag'], row_id=tuple_[0])
+                    list_object_rows.append(object_row)
+                list_save_data.extend(list_object_rows)  
+            session.add_all(list_save_data)
+            session.commit()
+
+    def insert_bad_request_data(self, data: list, list_save_data: list):
+          with self.__Session() as session:
+            for tuple_ in tqdm(data, total=len(data)):
+                dict_ = tuple_[1]
+                values = dict_.get('simple_forms')
+                list_object_rows = []
+                for value in values:
+                    object_row = ResultData(text=value['simple_form'], tag=value['tag'], row_id=tuple_[0])
                     list_object_rows.append(object_row)
                 list_save_data.extend(list_object_rows)  
             session.add_all(list_save_data)
@@ -51,7 +54,7 @@ class DBHelper:
         self.__session.commit()
 
     def delete_result_data(self, id):
-        data = self.__session.query(Result).filter(Result.id == id).first()
+        data = self.__session.query(ResultData).filter(ResultData.id == id).first()
         self.__session.delete(data)
         self.__session.commit()
 
@@ -59,20 +62,27 @@ class DBHelper:
         return self.__session.query(RawData).all()
 
     def get_result_data(self):
-        return self.__session.query(Result).all()
+        return self.__session.query(ResultData).all()
     
 class RawData(Base):
     __tablename__ = 'raw_data'
     id = Column(Integer, primary_key=True)
     text = Column(String)
     used = Column(Boolean, default=False)
-    data = relationship('Result', back_populates='result_data')
+    data = relationship('ResultData', back_populates='result_data')
 
-class Result(Base):
+class ResultData(Base):
     __tablename__ = 'result'
     id = Column(Integer, primary_key=True)
-    text = Column(String, ForeignKey('raw_data.id'))
+    text = Column(String)
     tag = Column(String)
-    row_id = Column(Integer)
+    row_id = Column(Integer, ForeignKey('raw_data.id'))
     result_data = relationship('RawData', back_populates='data')
+
+class BadRequestData(Base):
+    __tablename__ = 'bad_request'
+    id = Column(Integer, primary_key=True)
+    text = Column(String)
+    used = Column(Boolean, default=False)
+    row_id = Column(Integer, ForeignKey('raw_data.id'))
 
