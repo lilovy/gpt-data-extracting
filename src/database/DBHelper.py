@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, inspect, ForeignKey, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
-from src.tools import FindDict
 from tqdm import *
 import time
 
@@ -32,12 +31,17 @@ class DBHelper:
             session.add_all(list_save_data)
             session.commit()
  
-    
+    @timer
     def insert_result_data(self, data: list, list_save_data: list):
           with self.__Session() as session:
-            for row in tqdm(data, total=len(data)):
-                object_row = Result(text=row, tag=tag)
-                list_save_data.append(object_row)
+            for tuple_ in tqdm(data, total=len(data)):
+                dict_ = tuple_[1]
+                values = dict_.get('simple_forms')
+                list_object_rows = []
+                for value in values:
+                    object_row = Result(text=value['simple_form'], tag=value['tag'], row_id=tuple_[0])
+                    list_object_rows.append(object_row)
+                list_save_data.extend(list_object_rows)  
             session.add_all(list_save_data)
             session.commit()
 
@@ -69,5 +73,6 @@ class Result(Base):
     id = Column(Integer, primary_key=True)
     text = Column(String, ForeignKey('raw_data.id'))
     tag = Column(String)
+    row_id = Column(Integer)
     result_data = relationship('RawData', back_populates='data')
 
