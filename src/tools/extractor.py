@@ -8,7 +8,7 @@ from src.tools import get_proxy
 from src.tools import FindDict
 
 from src.V1 import MarkupGPT
-# from src.tools.database import get_data
+# from src.database import get_data
 
 
 class GPTResponser(object):
