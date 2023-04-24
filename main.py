@@ -1,5 +1,5 @@
-from src.tools import multi_process
-from src.tools import combine
+from src.tools.multi import multi_process
+from src.tools.extractor import combine
 from config import tokens
 
 if __name__ == "__main__":

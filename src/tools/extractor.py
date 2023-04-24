@@ -3,11 +3,15 @@ from config import (
     api_token,
     access_token2 as access_token,
     )
-from src.tools import LoadPrompt
-from src.tools import get_proxy
-from src.tools import FindDict
+# from src.tools import LoadPrompt
+# from src.tools import get_proxy
+# from src.tools import FindDict
+# from src.V1 import MarkupGPT
 
-from src.V1 import MarkupGPT
+from .prompt_loader import LoadPrompt
+from .proxy import get_proxy
+from .data_transform import FindDict
+from ..V1 import markupGPT
 # from src.database import get_data
 
 

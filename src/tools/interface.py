@@ -1,5 +1,6 @@
 import gradio as gr
-from src.tools import timer
+# from src.tools import timer
+from .timer import timer
 
 
 def hello(input):
