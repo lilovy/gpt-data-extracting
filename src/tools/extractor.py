@@ -82,15 +82,16 @@ def combine(token):
         try:
             resp = GPTResponser(token, prompt=prompt, proxy=proxy).ask(str_data)
 
-        except Exception as e:
-            print(e)
+            dicts = FindDict(resp)
+            if len(dicts) != num:
+                save_bad_request(data)
+            else:
+                result = list(zip(ids, dicts))
+                save_result(result)
 
-        dicts = FindDict(resp)
-        if len(dicts) != num:
-            save_bad_request(dicts)
-        else:
-            result = list(zip(ids, dicts))
-            save_result(result)
+        except Exception as e:
+            save_bad_request(data)
+            print(e)
 
         data: list = get_data(used=False, num=num)
 
