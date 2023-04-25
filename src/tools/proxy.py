@@ -31,9 +31,11 @@ def proxy_list(
     return proxy
 
 
+def proxy_from_file(filepath: str) -> str:
+    with open(filepath) as f:
+        proxies = f.read().split('\n')
+    return (proxies)
+
+
 def get_proxy() -> str:
     return choice(proxy_list()).get('proxy')
-
-if __name__ == "__main__":
-    print(get_proxy())
-    # print(proxy_list())

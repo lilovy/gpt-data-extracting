@@ -3,7 +3,6 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.future import select
 from tqdm import *
 import time
-from src.tools.timer import timer
 
 
 Base = declarative_base()
@@ -63,7 +62,6 @@ class DBHelper:
         self.__session.delete(data)
         self.__session.commit()
 
-    @timer
     def get_raw_data(self, num, used: bool = False) -> list[tuple]:
         data = self.__session.query(RawData).filter(RawData.used == used).limit(num).all()
         return [(d.id, d.text) for d in data]

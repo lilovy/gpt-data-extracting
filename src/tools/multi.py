@@ -1,4 +1,6 @@
+from multiprocessing.dummy import Pool as ThreadPool
 import multiprocessing as mp
+
 
 
 def multi_process(
@@ -11,3 +13,17 @@ def multi_process(
         pool.map(func, tokens)
 
 
+def mlt(
+    func,
+    data,
+):
+    processes = []
+    for t, proxy in data:
+        p = mp.Process(target=func, args=(t, proxy,))
+        processes.append(p)
+        p.start()
+    
+    # for p in processes:
+
+    for p in processes:
+        p.join()

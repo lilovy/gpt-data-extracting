@@ -1,16 +1,9 @@
 import openai
 from random import sample
-from config import (
-    api_token,
-    access_token2 as access_token,
-    )
-# from src.tools import LoadPrompt
-# from src.tools import get_proxy
-# from src.tools import FindDict
-# from src.V1 import MarkupGPT
 
+from config import proxy_file
 from .prompt_loader import LoadPrompt
-from .proxy import get_proxy
+from .proxy import get_proxy, proxy_from_file
 from .data_transform import FindDict
 from ..V1.markupGPT import MarkupGPT
 from .tokenizer import num_tokens_from_string as token_sum
@@ -79,11 +72,11 @@ def get_ids_texts(data: list[tuple]):
         texts.append(text)
     return ids, texts
 
-def combine(token):
+def combine(token, proxy):
     n = 20
     ns = 5000
     prompt = LoadPrompt('prompts/prompt_extract_data.txt').to_str
-    proxy = get_proxy()
+    proxy = 'http://' + proxy
     num = n
     data = sample(DB.get_raw_data(ns), num)
 
@@ -91,55 +84,28 @@ def combine(token):
         ids, texts = get_ids_texts(data)
 
         str_data = str(texts)
-        while token_sum(str_data) > 230:
+        while token_sum(str_data) > 200:
             num -= 1
             data = sample(DB.get_raw_data(ns), num)
             ids, texts = get_ids_texts(data)
             str_data = str(texts)
-        print(str_data, len(texts))
+        print(len(texts), proxy)
 
         try:
-            resp = GPTResponser(token, prompt=prompt).ask(str_data)
+            resp = GPTResponser(token, prompt=prompt, proxy=proxy).ask(str_data)
 
             dicts = FindDict(resp)
             if len(dicts) != num:
                 print('info is lost')
-                print(resp)
-                # DB.insert_bad_request_data(data)
             else:
                 result = list(zip(ids, dicts))
-                print(result)
                 DB.insert_result_data(result)
 
         except Exception as e:
-            # DB.insert_bad_request_data(data)
             print(e)
+            pass
 
         data = sample(DB.get_raw_data(ns), num)
         num = n
-        break
+        # break
 
-def msg(prompt):
-    return [
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Знание adaptive, responsive верстки"},
-        {"role": "assistant", "content": """{"original": "Знание adaptive, responsive верстки", "simple_forms": [{"simple_form": "знание adaptive верстки", "tag": "knowledge"}, {"simple_form": "знание responsive верстки", "tag": "knowledge"}]}"""},
-        {"role": "user", "content": "файер-вол, домен\nПроектные и мультимодальные перевозки;"},
-        {"role": "assistant", "content": """{"original": "файер-вол, домен", "simple_forms": [{"simple_form": "файер-вол", "tag": "unknown"}, {"simple_form": "домен", "tag": "unknown"}]}, {"original": "Проектные и мультимодальные перевозки;", "simple_forms": [{"simple_form": "проектные перевозки", "tag": "skill"}, {"simple_form": "мультимодальные перевозки", "tag": "skill"}]}"""},
-        ]
-
-def resp(token, messages: str | list[dict], proxy: str = None, prompt: str = None):
-    response = GPTResponser(token, proxy=proxy, prompt=prompt)
-    return response.ask(message)
-
-
-if __name__ == "__main__":
-    cont = "мультимодальные перевозки"
-
-    prompt = LoadPrompt('prompts/prompt_extract_data.txt')  
-    prompt += cont
-    print(resp(access_token, question))
-
-    prompt = LoadPrompt('prompts/prompt_light_v2.txt')
-    messages = msg(prompt) + {"role": "user", "content": cont}
-    print(resp(api_token, messages, prompt=prompt))
