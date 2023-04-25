@@ -1,4 +1,5 @@
 import openai
+from random import sample
 from config import (
     api_token,
     access_token2 as access_token,
@@ -11,8 +12,9 @@ from config import (
 from .prompt_loader import LoadPrompt
 from .proxy import get_proxy
 from .data_transform import FindDict
-from ..V1 import markupGPT
-# from src.database import get_data
+from ..V1.markupGPT import MarkupGPT
+from .tokenizer import num_tokens_from_string as token_sum
+from ..database.init_database import DB
 
 
 class GPTResponser(object):
@@ -69,36 +71,53 @@ class GPTResponser(object):
         return resp.ask(question)
 
 
+def get_ids_texts(data: list[tuple]):
+    ids = []
+    texts = []
+    for id, text in data:
+        ids.append(id)
+        texts.append(text)
+    return ids, texts
+
 def combine(token):
-    prompt = LoadPrompt('prompts/prompt_extract_data.txt')
+    n = 20
+    ns = 5000
+    prompt = LoadPrompt('prompts/prompt_extract_data.txt').to_str
     proxy = get_proxy()
-    num = 20
-    data: list = get_data(used=False, num=num)
+    num = n
+    data = sample(DB.get_raw_data(ns), num)
 
     while len(data) > 0:
-        texts = []
-        ids = []
-        for id, text in data:
-            ids.append(id)
-            texts.append(text)
-        str_data = '\n'.join(texts)
+        ids, texts = get_ids_texts(data)
+
+        str_data = str(texts)
+        while token_sum(str_data) > 230:
+            num -= 1
+            data = sample(DB.get_raw_data(ns), num)
+            ids, texts = get_ids_texts(data)
+            str_data = str(texts)
+        print(str_data, len(texts))
 
         try:
-            resp = GPTResponser(token, prompt=prompt, proxy=proxy).ask(str_data)
+            resp = GPTResponser(token, prompt=prompt).ask(str_data)
 
             dicts = FindDict(resp)
             if len(dicts) != num:
-                save_bad_request(data)
+                print('info is lost')
+                print(resp)
+                # DB.insert_bad_request_data(data)
             else:
                 result = list(zip(ids, dicts))
-                save_result(result)
+                print(result)
+                DB.insert_result_data(result)
 
         except Exception as e:
-            save_bad_request(data)
+            # DB.insert_bad_request_data(data)
             print(e)
 
-        data: list = get_data(used=False, num=num)
-
+        data = sample(DB.get_raw_data(ns), num)
+        num = n
+        break
 
 def msg(prompt):
     return [

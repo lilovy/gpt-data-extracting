@@ -1,5 +1,6 @@
 from revChatGPT.V1 import Chatbot
 from typing import Union
+from ..tools.timer import timer
 
 
 class MarkupGPT(object):
@@ -57,7 +58,7 @@ class MarkupGPT(object):
         self.__session.reset_chat()
         self.__conv_id = None
 
-
+    @timer
     def __request(
         self,
         question: str,

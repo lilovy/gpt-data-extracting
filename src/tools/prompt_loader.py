@@ -14,10 +14,14 @@ class LoadPrompt(object):
         with open(file, 'r', encoding='utf-8') as f:
             data = f.read()
         return data
+    
+    @property
+    def to_str(self):
+        return self.__prompt
 
     def __str__(self):
         return self.__prompt
 
 
 if __name__ == "__main__":
-    print(LoadPrompt('prompt_extract_data.txt'))
+    print(type(LoadPrompt('prompts/prompt_extract_data.txt').to_str))
