@@ -1,5 +1,6 @@
 import openai
 from random import sample
+from time import sleep
 
 from config import proxy_file
 from .prompt_loader import LoadPrompt
@@ -103,6 +104,7 @@ def combine(token, proxy):
 
         except Exception as e:
             print(e)
+            sleep(600)
             pass
 
         data = sample(DB.get_raw_data(ns), num)
