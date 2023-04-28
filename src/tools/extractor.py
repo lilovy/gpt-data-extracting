@@ -9,6 +9,7 @@ from .data_transform import FindDict
 from ..V1.markupGPT import MarkupGPT
 from .tokenizer import num_tokens_from_string as token_sum
 from ..database.init_database import DB
+from .timer import timer
 
 
 class GPTResponser(object):
@@ -34,8 +35,8 @@ class GPTResponser(object):
             return self.__unofficial_request(question)
 
         if isinstance(question, list):
-            if self.prompt != "":
-                question = self.prompt + question
+            # if self.prompt != "":
+                # question = self.prompt + question
             return self.__official_request(question)
 
     @property
@@ -46,14 +47,15 @@ class GPTResponser(object):
     def prompt(self, prompt: str) -> None:
         self.__prompt = prompt
 
+    @timer
     def __official_request(self, message: list[dict]):
         openai.api_key = self.__token
-        resp = openai.Completion.create(
+        resp = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=message,
             temperature=0,
         )
-        reply = resp.choices[0].message.content
+        reply = resp['choices'][0]['message']['content']
         return reply
 
     def __unofficial_request(self, question: str):
@@ -104,10 +106,58 @@ def combine(token, proxy):
 
         except Exception as e:
             print(e)
-            sleep(600)
+            sleep(300)
             pass
 
         data = sample(DB.get_raw_data(ns), num)
         num = n
         # break
 
+def msg(prompt):
+    return [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": "['Знание adaptive, responsive верстки']"},
+        {"role": "assistant", "content": """{"original": "Знание adaptive, responsive верстки", "simple_forms": [{"simple_form": "знание adaptive верстки", "tag": "knowledge"}, {"simple_form": "знание responsive верстки", "tag": "knowledge"}]}"""},
+        {"role": "user", "content": "['файер-вол, домен', 'Проектные и мультимодальные перевозки;']"},
+        {"role": "assistant", "content": """{"original": "файер-вол, домен", "simple_forms": [{"simple_form": "файер-вол", "tag": "unknown"}, {"simple_form": "домен", "tag": "unknown"}]}, {"original": "Проектные и мультимодальные перевозки;", "simple_forms": [{"simple_form": "проектные перевозки", "tag": "skill"}, {"simple_form": "мультимодальные перевозки", "tag": "skill"}]}"""},
+        ]
+
+def api_combine(token, proxy):
+    n = 20
+    ns = 5000
+    prmt = LoadPrompt('prompts\prompt_light_v2.txt').to_str
+    proxy = 'http://' + proxy
+    num = n
+    data = sample(DB.get_raw_data(ns), num)
+
+    while len(data) > 0:
+        prompt = prmt
+        message = msg(prompt)
+        ids, texts = get_ids_texts(data)
+
+        str_data = str(texts)
+        # while token_sum(str_data) > 200:
+        #     num -= 1
+        #     data = sample(DB.get_raw_data(ns), num)
+        #     ids, texts = get_ids_texts(data)
+        #     str_data = str(texts)
+        message += [{"role": "user", "content": str_data}]
+        print(len(texts), proxy)
+
+        try:
+            resp = GPTResponser(token, proxy=proxy).ask(message)
+
+            dicts = FindDict(resp)
+            if len(dicts) != num:
+                print('info is lost')
+            else:
+                result = list(zip(ids, dicts))
+                DB.insert_result_data(result)
+
+        except Exception as e:
+            print(e)
+            sleep(30)
+            pass
+
+        data = sample(DB.get_raw_data(ns), num)
+        num = n

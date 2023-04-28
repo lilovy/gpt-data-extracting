@@ -1,5 +1,5 @@
-from multiprocessing.dummy import Pool as ThreadPool
 import multiprocessing as mp
+import threading as tr
 
 
 
@@ -22,8 +22,19 @@ def mlt(
         p = mp.Process(target=func, args=(t, proxy,))
         processes.append(p)
         p.start()
-    
-    # for p in processes:
 
     for p in processes:
         p.join()
+
+def thr(
+    data: list[tuple[object, tuple]],
+):
+    processes = []
+    for func, tok_prx in data:
+        for args in tok_prx:
+            t = tr.Thread(target=func, args=args)
+            processes.append(t)
+            t.start()
+    
+    for t in processes:
+        t.join()
