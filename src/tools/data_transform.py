@@ -17,7 +17,7 @@ class FindDict(object):
         return instance()
 
     def __find_dict(self, data: str) -> list:
-        pattern = r'\{"original":.*?\]\}'
+        pattern = r'\{"original":.*?\}\]\}'
         dict_list = re.findall(pattern, data)
         return dict_list
 

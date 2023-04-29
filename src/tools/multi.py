@@ -27,7 +27,7 @@ def mlt(
         p.join()
 
 def thr(
-    data: list[tuple[object, tuple]],
+    data: list[tuple[object, list[tuple]]],
 ):
     processes = []
     for func, tok_prx in data:
@@ -35,6 +35,21 @@ def thr(
             t = tr.Thread(target=func, args=args)
             processes.append(t)
             t.start()
+    
+    for t in processes:
+        t.join()
+
+def thr_bing(
+    data: tuple[object, list[dict]]
+):
+    processes = []
+    func, data = data
+    for d in data:
+        cookie = d.get('cookie')
+        proxy = d.get('proxy')
+        t = tr.Thread(target=func, args=(cookie, proxy))
+        processes.append(t)
+        t.start()
     
     for t in processes:
         t.join()

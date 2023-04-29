@@ -1,4 +1,5 @@
 import pickle
+import json
 # from src.tools import timer
 from .timer import timer
 import pandas as pd
@@ -19,6 +20,10 @@ def pickling(data, file, mode = 'ab+'):
     with open(file, mode) as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+def load_cookies(file):
+    with open(file, 'r') as f:
+        cookies = json.load(f)
+    return cookies
 
 if __name__ == "__main__":
     data = load_pkl('.localdata/data_500k.pkl')
