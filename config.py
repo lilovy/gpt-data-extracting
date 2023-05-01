@@ -20,7 +20,7 @@ api_tokens = [
     api_token2,
 ]
 
-proxy_file = 'resources\proxies\Proxy-25-04-2023 (1).txt'
+proxy_file = 'resources\proxies\\bing_proxy.txt'
 proxies = proxy_from_file(proxy_file)
 
 tok_prx = list(zip(tokens, proxies))

@@ -12,7 +12,7 @@ class BingGPT:
     async def ask(self, prompt: str, debag: bool = False):
         request = await self.__bot.ask(
             prompt=prompt,
-            conversation_style=ConversationStyle.precise,
+            conversation_style=ConversationStyle.balanced,
             wss_link="wss://sydney.bing.com/sydney/ChatHub",
         )
         await self.__bot.close()

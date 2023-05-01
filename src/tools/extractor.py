@@ -114,8 +114,8 @@ def combine(token, proxy):
 
         except Exception as e:
             print(e)
-            print(resp)
-            sleep(300)
+            # print(resp)
+            sleep(600)
             pass
 
         data = sample(DB.get_raw_data(ns), num)
@@ -253,7 +253,7 @@ async def bing_req(cookies: dict, proxy: str):
             dicts = FindDict(response)
 
             if len(dicts) != num:
-                print(response)
+                # print(response)
                 print('info is lost')
             else:
                 result = list(zip(ids, dicts))
@@ -262,6 +262,7 @@ async def bing_req(cookies: dict, proxy: str):
         except Exception as e:
             if str(e) in ("'messages'", "'text"):
                 print(f"Error: {e}")
+                sleep(600)
             else:
                 print(e)
 
@@ -269,6 +270,7 @@ async def bing_req(cookies: dict, proxy: str):
 def bing_loop(cookies: dict, proxy: str):
     while True:
         asyncio.run(bing_req(cookies, proxy))
+        sleep(1)
 
 def start_bing(cookies: dict, proxy: str):
     asyncio.run(bing_combine(cookies, proxy))
