@@ -14,7 +14,7 @@ if __name__ == "__main__":
     while True:
         n += 1
         try:
-            cookies.append(load_cookies(f'./cookies/cookies{n}.json'))
+            cookies.append(load_cookies(f'./resources/cookies/cookies{n}.json'))
         except Exception as e:
             break
 
