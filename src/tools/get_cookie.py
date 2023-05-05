@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from mail_reader import EmailReader, MailCriteria
+from src.tools.mail_reader import EmailReader, MailCriteria
 from time import sleep
 
 
@@ -16,6 +16,7 @@ from time import sleep
 class ParserBing:
     def __init__(self, user_agent: str):
         firefox_options = webdriver.FirefoxOptions()
+        firefox_options.headless = True
         # firefox_options.add_argument('-private')
         firefox_profile = webdriver.FirefoxProfile()    
         firefox_profile.set_preference("general.useragent.override", user_agent)
@@ -39,7 +40,6 @@ class ParserBing:
         input_field.send_keys(text)
         # print(f'Введен текст: {element_id}')
         # print(f'Текст: {text}')
-
 
     def parser_bing(self, add_user: str, add_password: str, dict_id_elements: dict): 
         try:
@@ -68,17 +68,17 @@ class ParserBing:
                     continue
         except:
             return
-    
+
     def get_cookies_from_bing(self):
         cookies = self.__driver.get_cookies()
         return cookies
-    
+
     def close_driver(self):
         self.__driver.quit()
-    
+
 
 def get_code_from_rambler(user: str, password: str):
-     with EmailReader(
+    with EmailReader(
         client="imap.rambler.ru", 
         email_address=user, 
         password=password,
@@ -111,7 +111,7 @@ def get_dict_id_elements(user: str, password: str, add_user: str, add_password: 
         }   
     return dict_id_elements
 
-def get_cookie(user, password, add_user, add_password, user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1788.0'):
+def get_cookie(user, password, add_user, add_password, user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.0.0'):
     dict_id_elements = get_dict_id_elements(user, password, add_user, add_password)
     browser = ParserBing(user_agent=user_agent)
     browser.sending_link()
@@ -119,6 +119,7 @@ def get_cookie(user, password, add_user, add_password, user_agent='Mozilla/5.0 (
     cookie = browser.get_cookies_from_bing()
     browser.close_driver()
     return cookie
+
 
 if __name__ == '__main__':
     user = 'conclemnae@outlook.com'

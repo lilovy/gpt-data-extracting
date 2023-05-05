@@ -1,8 +1,11 @@
-from sqlalchemy import create_engine, Column, Integer, String, inspect, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, inspect, ForeignKey, Boolean, Text, TIMESTAMP
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from sqlalchemy.future import select
+from sqlalchemy import func
 from tqdm import *
 import time
+from datetime import datetime
+import json
 
 
 Base = declarative_base()
@@ -70,6 +73,77 @@ class DBHelper:
         data_row = self.__session.query(RawData).filter(RawData.id == id).update({"used": True})
         self.__session.commit()
 
+    def add_bind_session(
+        self, 
+        email: str,
+        password: str,
+        second_email: str = None,
+        second_password: str = None,
+        ):
+        with self.__Session() as session:
+            obj = BingCookie(
+                email=email,
+                password=password,
+                second_email=second_email,
+                second_password=second_password,
+                )
+            session.add(obj)
+            session.commit()
+
+    def update_bing_cookie(
+        self,
+        email: str,
+        cookie: str,
+        ):
+        update = self.__session.query(
+            BingCookie
+        ).filter(
+            BingCookie.email == email
+        ).update(
+            {
+                "cookie": cookie, 
+                "timestamp": func.strftime("%s", datetime.utcnow()),
+            }
+        )
+        self.__session.commit()
+
+    def get_cookie(
+        self,
+        email: str,
+        ) -> dict:
+        query: BingCookie
+        query = self.__session.query(BingCookie).filter(BingCookie.email == email).first()
+        if query:
+            return {"cookie": query.cookie, "timestamp": query.timestamp}
+        return
+
+    def get_emails(
+        self,
+        ) -> list[str]:
+        query = self.__session.query(BingCookie).all()
+        if query:
+            return [email.email for email in query]
+        return
+
+    def get_stale_cookie(self) -> list[dict]:
+        query = self.__session.query(
+            BingCookie
+        ).filter(
+            BingCookie.timestamp < (func.strftime("%s", datetime.utcnow()) - 1500)
+        ).all()
+        stale = []
+        for q in query:
+            q: BingCookie
+            d = {}
+            d["email"] = q.email
+            d["password"] = q.password
+            d["second_email"] = q.second_email
+            d["second_password"] = q.second_password
+            d["cookie"] = q.cookie
+            stale.append(d)
+        if len(stale) > 0:
+            return stale
+        return
 
 class RawData(Base):
     __tablename__ = 'raw_data'
@@ -93,3 +167,12 @@ class BadRequestData(Base):
     used = Column(Boolean, default=False)
     raw_data_id = Column(Integer, ForeignKey('raw_data.id'))
 
+class BingCookie(Base):
+    __tablename__ = 'cookies_bing_session'
+    id = Column(Integer, primary_key=True)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    second_email = Column(String)
+    second_password = Column(String)
+    cookie = Column(Text)
+    timestamp = Column(Integer, default=func.strftime("%s", datetime.utcnow()))

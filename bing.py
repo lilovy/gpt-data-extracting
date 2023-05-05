@@ -17,6 +17,8 @@ if __name__ == "__main__":
             cookies.append(load_cookies(f'./resources/cookies/cookies{n}.json'))
         except Exception as e:
             break
+    
+    print(cookies)
 
     proxies = proxy_from_file(proxy_file)
     cookie_proxy = [{"cookie": c, "proxy": p} for c, p in list(zip(cookies, proxies))]
