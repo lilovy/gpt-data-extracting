@@ -41,7 +41,7 @@ class ParserBing:
         # print(f'Введен текст: {element_id}')
         # print(f'Текст: {text}')
 
-    def parser_bing(self, add_user: str, add_password: str, dict_id_elements: dict): 
+    def parser_bing(self, second_email: str, second_password: str, dict_id_elements: dict): 
         try:
             self.__click_element('/html/body/div[2]/div/div[2]/div[2]/div[2]/div/div/div[3]/div/div[2]/a[1]', True)
             for element in dict_id_elements:
@@ -50,7 +50,7 @@ class ParserBing:
                         self.__send_text(element, '')
                         # print('элемент обнаружен')
                         sleep(10)
-                        code = get_code_from_rambler(add_user, add_password)
+                        code = get_code_from_rambler(second_email, second_password)
                         # print(code)
                         self.__send_text(element, code)
                     else:
@@ -93,13 +93,13 @@ def get_code_from_rambler(user: str, password: str):
         else:
             return get_code_from_rambler(user, password)
 
-def get_dict_id_elements(user: str, password: str, add_user: str, add_password: str):
+def get_dict_id_elements(user: str, password: str, second_email: str, second_password: str):
     dict_id_elements = {
         'i0116' : ['txt', user],
         '1idSIButton9' : ['btn', False],
         'i0118' : ['txt', password],
         '2idSIButton9' : ['btn', False],
-        'iProofEmail' : ['txt', add_user],
+        'iProofEmail' : ['txt', second_email],
         'iSelectProofAction' : ['btn', False],
         'iOttText' : ['txt', 'code'],
         'iVerifyCodeAction' : ['btn', False],
@@ -111,11 +111,11 @@ def get_dict_id_elements(user: str, password: str, add_user: str, add_password: 
         }   
     return dict_id_elements
 
-def get_cookie(user, password, add_user, add_password, user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.0.0'):
-    dict_id_elements = get_dict_id_elements(user, password, add_user, add_password)
+def get_cookie(email, password, second_email, second_password, user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.0.0'):
+    dict_id_elements = get_dict_id_elements(email, password, second_email, second_password)
     browser = ParserBing(user_agent=user_agent)
     browser.sending_link()
-    browser.parser_bing(add_user, add_password, dict_id_elements)
+    browser.parser_bing(second_email, second_password, dict_id_elements)
     cookie = browser.get_cookies_from_bing()
     browser.close_driver()
     return cookie
@@ -124,8 +124,8 @@ def get_cookie(user, password, add_user, add_password, user_agent='Mozilla/5.0 (
 if __name__ == '__main__':
     user = 'conclemnae@outlook.com'
     password = 'g2vMOUxhLn'
-    add_user = 'spadgerthankpa1999@ro.ru'
-    add_password = 'sdWj8ixDA'
-    get_cookie(user, password, add_user, add_password)
+    second_email = 'spadgerthankpa1999@ro.ru'
+    second_password = 'sdWj8ixDA'
+    get_cookie(user, password, second_email, second_password)
 
 

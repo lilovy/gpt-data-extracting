@@ -79,6 +79,7 @@ class DBHelper:
         password: str,
         second_email: str = None,
         second_password: str = None,
+        cookie: str = None,
         ):
         with self.__Session() as session:
             obj = BingCookie(
@@ -86,6 +87,7 @@ class DBHelper:
                 password=password,
                 second_email=second_email,
                 second_password=second_password,
+                cookie=cookie,
                 )
             session.add(obj)
             session.commit()
@@ -107,14 +109,21 @@ class DBHelper:
         )
         self.__session.commit()
 
-    def get_cookie(
+    def get_fresh_cookie(
         self,
-        email: str,
-        ) -> dict:
+        # email: str,
+        ) -> str:
         query: BingCookie
-        query = self.__session.query(BingCookie).filter(BingCookie.email == email).first()
+        query = self.__session.query(
+            BingCookie
+        ).filter(
+            # BingCookie.email == email,
+            BingCookie.timestamp > (func.strftime("%s", datetime.utcnow()) - 1500)
+        ).all()
         if query:
-            return {"cookie": query.cookie, "timestamp": query.timestamp}
+            cookies = [q.cookie for q in query if q.cookie]
+            if len(cookies) > 0:
+                return cookies
         return
 
     def get_emails(
@@ -125,7 +134,23 @@ class DBHelper:
             return [email.email for email in query]
         return
 
-    def get_stale_cookie(self) -> list[dict]:
+    def get_auth_data(self):
+        query = self.__session.query(BingCookie).all()
+        if query:
+            res = []
+            for q in query:
+                q: BingCookie
+                dct = {
+                    "email": q.email,
+                    "password": q.password,
+                    "second_email": q.second_email,
+                    "second_password": q.second_password,
+                }
+                res.append(dct)
+            return res
+        return
+
+    def get_stale_cookies(self) -> list[dict]:
         query = self.__session.query(
             BingCookie
         ).filter(
@@ -139,7 +164,8 @@ class DBHelper:
             d["password"] = q.password
             d["second_email"] = q.second_email
             d["second_password"] = q.second_password
-            d["cookie"] = q.cookie
+            # if q.cookie:
+            #     d["cookie"] = q.cookie
             stale.append(d)
         if len(stale) > 0:
             return stale
