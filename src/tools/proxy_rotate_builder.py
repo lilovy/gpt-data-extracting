@@ -46,7 +46,7 @@ class ProxyBuilder(object):
         }
 
     def __init__(self, address: str, port: int, username: str = "", password: str = ""):
-        self.address =address
+        self.address = address
         self.port = port
         self.username = username
         self.password = password
