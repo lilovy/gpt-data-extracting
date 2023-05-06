@@ -38,6 +38,7 @@ if __name__ == "__main__":
     proxies = proxy_from_file(proxy_file)
 
     mail_proxy = [{"mail": m, "proxy": p} for m, p in list(zip(mails, proxies))]
+    # print(mail_proxy)
 
     data = (bing_loop, mail_proxy)
 

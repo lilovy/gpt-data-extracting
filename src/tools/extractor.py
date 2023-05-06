@@ -284,6 +284,8 @@ async def bing_req(email: str, proxy: str):
     else:
         cookie = cookie[0]
 
+    # print(type(cookie))
+    # return
     bot = BingGPT(cookie, proxy)
     data = sample(DB.get_raw_data(ns), num)
 
