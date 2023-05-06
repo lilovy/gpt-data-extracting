@@ -3,6 +3,7 @@ from random import sample
 from time import sleep
 import asyncio
 import chardet
+import json
 import re
 import unicodedata
 
@@ -13,6 +14,7 @@ from .data_transform import FindDict
 from ..V1.markupGPT import MarkupGPT
 from ..V1.edgeGPT import BingGPT
 from .tokenizer import num_tokens_from_string as token_sum
+from .get_cookie import get_cookie
 from ..database.init_database import DB
 from .timer import timer
 
@@ -222,7 +224,7 @@ async def bing_combine(cookies: dict, proxy: str):
         sleep(10)
         # break
 
-async def bing_req(cookies: dict, proxy: str):
+# async def bing_req(cookies: dict, proxy: str):
     n = 10
     ns = 5000
     num = n
@@ -266,10 +268,68 @@ async def bing_req(cookies: dict, proxy: str):
             else:
                 print(e)
 
+async def bing_req(email: str, proxy: str):
+    n = 10
+    ns = 5000
+    num = n
+    prmt = LoadPrompt('prompts/prompt_extract_data.txt').to_str
+    proxy = 'http://' + proxy
+    cookie = DB.get_fresh_cookie(email)
 
-def bing_loop(cookies: dict, proxy: str):
+    if not cookie:
+        auth_data = DB.get_auth_data(email)[0]
+        cookie = get_cookie(**auth_data)
+        DB.update_bing_cookie(email, cookie)
+        cookie = json.dumps(cookie)
+    else:
+        cookie = cookie[0]
+
+    bot = BingGPT(cookie, proxy)
+    data = sample(DB.get_raw_data(ns), num)
+
+    if len(data) > 0:
+        ids, texts = get_ids_texts(data)
+        str_data = str(texts)
+        prompt = prmt + str_data
+
+        while len(prompt) > 2000:
+            num -= 1
+            data = sample(DB.get_raw_data(ns), num)
+            ids, texts = get_ids_texts(data)
+            str_data = str(texts)
+            prompt = prmt + str_data
+        print(len(prompt), num, proxy)
+
+        try:
+            task = asyncio.create_task(bot.ask(prompt))
+            response: str = await task
+            if "\\xa0" in response:
+                print('xa0 detect')
+                response = response.replace("\\xa0", "\u00A0")
+            dicts = FindDict(response)
+
+            if len(dicts) != num:
+                # print(response)
+                print('info is lost')
+            else:
+                result = list(zip(ids, dicts))
+                DB.insert_result_data(result)
+
+        except Exception as e:
+            if str(e) in ("'messages'", "'text"):
+                print(f"Error: {e}")
+                sleep(600)
+            else:
+                print(e)
+
+# def bing_loop(cookies: dict, proxy: str):
+#     while True:
+#         asyncio.run(bing_req(cookies, proxy))
+#         sleep(1)
+
+def bing_loop(mail: str, proxy: str):
     while True:
-        asyncio.run(bing_req(cookies, proxy))
+        asyncio.run(bing_req(mail, proxy))
         sleep(1)
 
 def start_bing(cookies: dict, proxy: str):
