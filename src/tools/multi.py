@@ -45,9 +45,9 @@ def thr_bing(
     processes = []
     func, data = data
     for d in data:
-        cookie = d.get('cookie')
+        mail = d.get('mail')
         proxy = d.get('proxy')
-        t = tr.Thread(target=func, args=(cookie, proxy))
+        t = tr.Thread(target=func, args=(mail, proxy))
         processes.append(t)
         t.start()
     
