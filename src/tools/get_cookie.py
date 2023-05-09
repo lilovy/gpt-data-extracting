@@ -21,7 +21,7 @@ class Browser:
     def change_user_agent(self, user_agent: str):
         self.__firefox_profile = webdriver.FirefoxProfile()    
         self.__firefox_profile.set_preference("general.useragent.override", user_agent)
-                                              
+
     def sending_link(self, url: str='https://login.live.com/'):
         self.__driver.get(url=url)
     
@@ -57,7 +57,7 @@ class ElementBtn:
         self.element = element
         self.__is_xpath = is_xpath
         self.__wait = wait
- 
+
     def action_element(self):
         try:
             if self.__is_xpath:
@@ -111,7 +111,7 @@ def create_list_object_element(dict_marked_elements: dict, wait: WebDriverWait) 
     for element in dict_marked_elements:
         if dict_marked_elements[element][0] == 'btn':
             if element.find('idSIButton9') != -1 or element.find('idBtn_Back') != -1 or element.find('id__0') != -1:
-                 el_btn = ElementBtn(element[1:], wait, dict_marked_elements[element][1])
+                el_btn = ElementBtn(element[1:], wait, dict_marked_elements[element][1])
             else:
                 el_btn = ElementBtn(element, wait, dict_marked_elements[element][1])
             list_element_object.append(el_btn)
@@ -135,12 +135,13 @@ def parser_bing(list_objects: list[object]):
         browser.close_driver()
         return cookie
 
-def get_cookie(email: str, password: str, second_email: str, second_password : str, wait: WebDriverWait):
+def get_cookie(email: str, password: str, second_email: str, second_password : str):
     dict_elements = get_dict_id_elements(email, password, second_email, second_password)
+    wait = browser.wait_clickable_element()
     list_objects = create_list_object_element(dict_elements, wait)
     cookie = parser_bing(list_objects)
     return cookie
-      
+
 
 if __name__ == '__main__':
     email = 'ehleuveltomcbu@outlook.com'
