@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from mail_reader import MailCriteria, EmailReader
+from time import sleep
 from tqdm import *
 
 
@@ -15,7 +17,7 @@ class Browser:
         self.__driver = webdriver.Firefox(firefox_profile=self.__firefox_profile) #options=firefox_options
 
     def wait_clickable_element(self) -> WebDriverWait:
-        self.wait = WebDriverWait(self.__driver, 1)
+        self.wait = WebDriverWait(self.__driver, 2)
         return self.wait
 
     def change_user_agent(self, user_agent: str):
@@ -33,6 +35,14 @@ class Browser:
         self.__driver.quit()
 
 
+class User:
+    def __init__(self, email: str, password: str, second_email: str, second_password: str):
+        self.email = email
+        self.password = password
+        self.second_email = second_email
+        self.second_password = second_password
+
+
 class ElementText:    
     def __init__(self, element: str, text: str, wait: WebDriverWait, is_xpath: bool = False):
         self.element = element
@@ -40,13 +50,21 @@ class ElementText:
         self.__is_xpath = is_xpath
         self.__wait = wait
 
-    def action_element(self):
-        try:
+    def action_element(self, email: User):
+        try:        
             if self.__is_xpath:
                 self.__input_field = self.__wait.until(EC.element_to_be_clickable((By.XPATH, self.element)))
             else:
                 self.__input_field = self.__wait.until(EC.element_to_be_clickable((By.ID, self.element)))
-            self.__input_field.send_keys(self.__text)
+            if self.element == 'iOttText' or self.element == 'idTxtBx_OTC_Password':
+                print('элемент обнаружен')
+                
+                sleep(10)
+                code = get_code_from_rambler(email)
+                print(code)
+                self.__input_field.send_keys(code)
+            else:
+                self.__input_field.send_keys(self.__text)
         except:
             # print(f'Пропущен элемент: {self.element}')
             return
@@ -57,7 +75,7 @@ class ElementBtn:
         self.element = element
         self.__is_xpath = is_xpath
         self.__wait = wait
-
+ 
     def action_element(self):
         try:
             if self.__is_xpath:
@@ -75,21 +93,33 @@ class ElementBtn:
                 return True
         except:
             return False
-    
+        
 
-browser = Browser()
+def get_code_from_rambler(email: User):
+    with EmailReader(
+        client="imap.rambler.ru", 
+        email_address=email.second_email, 
+        password=email.second_password,
+        ) as reader:
 
-browser.sending_link()
-wait = browser.wait_clickable_element()
+        body = reader.get_code_from_email(
+            sender_email="account-security-noreply@accountprotection.microsoft.com",
+            criteria=MailCriteria.UNSEEN
+            )
+        if body:
+            return body
+        else:
+
+            return get_code_from_rambler(email.second_email, email.second_password)    
 
 
-def get_dict_id_elements(user: str, password: str, add_user: str, add_password: str):
+def get_dict_id_elements(email: User):
     dict_id_elements = {
-        'i0116' : ['txt', user, False],
+        'i0116' : ['txt', email.email, False],
         '1idSIButton9' : ['btn', False],
-        'i0118' : ['txt', password, False],
+        'i0118' : ['txt', email.password, False],
         '2idSIButton9' : ['btn', False],
-        'iProofEmail' : ['txt', add_user, False],
+        'iProofEmail' : ['txt', email.second_email, False],
         'iSelectProofAction' : ['btn', False],
         'iOttText' : ['txt', 'code', False],
         'iVerifyCodeAction' : ['btn', False],
@@ -99,6 +129,7 @@ def get_dict_id_elements(user: str, password: str, add_user: str, add_password: 
         'idTxtBx_OTC_Password' : ['txt', 'code', False],
         '3idSIButton9' : ['btn', False],
         '2idBtn_Back' : ['btn', False],
+        'bnp_btn_reject' : ['btn', False],
         '/html/body/div[2]/div/div[2]/div[2]/div[2]/div/div/div[3]/div/div[2]/a[1]' : ['btn', True],
         '/html/body/div[1]/div[2]/div/div[2]/div/div[1]/div[2]/div/div/div/div/div/div[1]/div/div/div/a' : ['btn', True],
         '/html/body/header/nav/ul/li[2]/a' : ['btn', True],
@@ -121,35 +152,34 @@ def create_list_object_element(dict_marked_elements: dict, wait: WebDriverWait) 
             list_element_object.append(el_txt)
     return list_element_object
 
-def parser_bing(list_objects: list[object]):
+def parser_bing(browser: Browser, email: User, list_objects: list[object]):
         is_parser = True
         while is_parser:
-            for object_el in tqdm(list_objects, total=len(list_objects)):
+            for object_el in list_objects:
                 if isinstance(object_el, ElementBtn):
                     if object_el.is_check_btn():
                         browser.sending_link('https://bing.com/chat')
                         is_parser = False
                         break
-                object_el.action_element()
+                object_el.action_element(email)
+        sleep(3)
         cookie = browser.get_cookies_from_bing()
-        browser.close_driver()
+        # browser.close_driver()
         return cookie
 
-def get_cookie(email: str, password: str, second_email: str, second_password : str):
+def get_cookie(email: str, password: str, second_email: str, second_password : str, wait: WebDriverWait):
     dict_elements = get_dict_id_elements(email, password, second_email, second_password)
-    wait = browser.wait_clickable_element()
     list_objects = create_list_object_element(dict_elements, wait)
-    cookie = parser_bing(list_objects)
+    cookie = parser_bing(browser, user, list_objects)
     return cookie
 
 
 if __name__ == '__main__':
-    email = 'ehleuveltomcbu@outlook.com'
-    password = '3WkAQqPh1i'
-    second_email = 'salugihi@rambler.ru'
-    second_password = '9gNqXGwT4M'
-
-    cookie = get_cookie(email, password, second_email, second_password, wait)
+    user = 'conclemnae@outlook.com'
+    password = 'g2vMOUxhLn'
+    second_email = 'spadgerthankpa1999@ro.ru'
+    second_password = 'sdWj8ixDA'
+    cookie = get_cookie(user, password, second_email, second_password)
     print(cookie)
 
 
