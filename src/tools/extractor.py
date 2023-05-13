@@ -16,6 +16,7 @@ from ..V1.edgeGPT import BingGPT
 from .tokenizer import num_tokens_from_string as token_sum
 from .get_cookie import get_cookie
 from ..database.init_database import DB
+from ..database.DBHelper import BingData, ResultData
 from .timer import timer
 
 
@@ -112,7 +113,7 @@ def combine(token, proxy):
                 print('info is lost')
             else:
                 result = list(zip(ids, dicts))
-                DB.insert_result_data(result)
+                DB.insert_result_data(result, ResultData)
 
         except Exception as e:
             print(e)
@@ -163,7 +164,7 @@ def api_combine(token, proxy):
                 print('info is lost')
             else:
                 result = list(zip(ids, dicts))
-                DB.insert_result_data(result)
+                DB.insert_result_data(result, ResultData)
 
         except Exception as e:
             print(e)
@@ -210,7 +211,7 @@ async def bing_combine(cookies: dict, proxy: str):
                 print('info is lost')
             else:
                 result = list(zip(ids, dicts))
-                DB.insert_result_data(result)
+                DB.insert_result_data(result, BingData)
 
         except Exception as e:
             if str(e) in ("'messages'", "'text"):
@@ -259,7 +260,7 @@ async def bing_combine(cookies: dict, proxy: str):
                 print('info is lost')
             else:
                 result = list(zip(ids, dicts))
-                DB.insert_result_data(result)
+                DB.insert_result_data(result, BingData)
 
         except Exception as e:
             if str(e) in ("'messages'", "'text"):
@@ -267,6 +268,13 @@ async def bing_combine(cookies: dict, proxy: str):
                 sleep(600)
             else:
                 print(e)
+
+def get_cookies(email: str):
+    auth_data = DB.get_auth_data(email)[0]
+    cookie = get_cookie(**auth_data)
+    DB.update_bing_cookie(email, cookie)
+    cookie = json.dumps(cookie)
+    return cookie
 
 async def bing_req(email: str, proxy: str):
     n = 10
@@ -277,12 +285,14 @@ async def bing_req(email: str, proxy: str):
     cookie = DB.get_fresh_cookie(email)
 
     if not cookie:
-        auth_data = DB.get_auth_data(email)[0]
-        cookie = get_cookie(**auth_data)
-        DB.update_bing_cookie(email, cookie)
-        cookie = json.dumps(cookie)
-    else:
-        cookie = cookie[0]
+    #     auth_data = DB.get_auth_data(email)[0]
+    #     cookie = get_cookies(**auth_data)
+    #     DB.update_bing_cookie(email, cookie)
+    #     cookie = json.dumps(cookie)
+    # else:
+    #     cookie = cookie[0]
+        cookie = get_cookies(email)
+
 
     # print(type(cookie))
     # return
@@ -315,7 +325,7 @@ async def bing_req(email: str, proxy: str):
                 print('info is lost')
             else:
                 result = list(zip(ids, dicts))
-                DB.insert_result_data(result)
+                DB.insert_result_data(result, BingData)
 
         except Exception as e:
             if str(e) in ("'messages'", "'text"):
@@ -323,6 +333,7 @@ async def bing_req(email: str, proxy: str):
                 sleep(600)
             else:
                 print(e)
+                get_cookies(email)
 
 # def bing_loop(cookies: dict, proxy: str):
 #     while True:

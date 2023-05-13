@@ -21,4 +21,4 @@ if __name__ == "__main__":
 
     data = (bing_loop, mail_proxy)
 
-    # thr_bing(data=data)
+    thr_bing(data=data)

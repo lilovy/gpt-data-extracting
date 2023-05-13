@@ -26,7 +26,7 @@ class DBHelper:
             session.add_all(d)
             session.commit()
 
-    def insert_result_data(self, data: list[tuple]):
+    def insert_result_data(self, data: list[tuple], Table: Base):
         d = []
         with self.__Session() as session:
             for tuple_ in tqdm(data, total=len(data)):
@@ -35,7 +35,8 @@ class DBHelper:
                 values = dict_.get('simple_forms')
                 # list_object_rows = []
                 for value in values:
-                    object_row = ResultData(text=value['simple_form'], tag=value['tag'], raw_data_id=id)
+                    # object_row = ResultData(text=value['simple_form'], tag=value['tag'], raw_data_id=id)
+                    object_row = Table(text=value['simple_form'], tag=value['tag'], raw_data_id=id)
                     d.append(object_row)
                 # d.extend(list_object_rows)  
                 self.update_data_flag(id)
@@ -205,6 +206,7 @@ class RawData(Base):
     text = Column(String)
     used = Column(Boolean, default=False)
     data = relationship('ResultData', back_populates='result_data')
+    bing_data = relationship('BingData', back_populates='bing_data')
 
 class ResultData(Base):
     __tablename__ = 'result'
@@ -213,6 +215,14 @@ class ResultData(Base):
     tag = Column(String)
     raw_data_id = Column(Integer, ForeignKey('raw_data.id'))
     result_data = relationship('RawData', back_populates='data')
+
+class BingData(Base):
+    __tablename__ = 'bing_result'
+    id = Column(Integer, primary_key=True)
+    text = Column(String)
+    tag = Column(String)
+    raw_data_id = Column(Integer, ForeignKey('raw_data.id'))
+    bing_data = relationship('RawData', back_populates='bing_data')
 
 class BadRequestData(Base):
     __tablename__ = 'bad_request'
