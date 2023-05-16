@@ -1,6 +1,7 @@
 import imaplib
 import email
 import re
+from time import sleep
 
 
 class MailCriteria:
@@ -17,13 +18,15 @@ class MailCriteria:
 
 
 class EmailReader:
-    def __init__(self, client: str, email_address: str, password: str):
+    def __init__(self, client: str, email_address: str, password: str, delay: int = 0):
         self.client = client
         self.email_address = email_address
         self.password = password
         self.mail = None
+        self.delay = delay
 
     def __enter__(self):
+        sleep(self.delay)
         # Connect to the IMAP server
         self.mail = imaplib.IMAP4_SSL(self.client)
 
@@ -105,7 +108,7 @@ class EmailReader:
                         body = msg.get_payload(decode=True)
 
                     # Extract the code from the email body using regular expressions
-                    code_regex = r"\d+"  # 6-digit code
+                    code_regex = r"\d{7}"  # 6-digit code
                     code_match = re.search(code_regex, body.decode())
 
                     # Return the code if found
@@ -114,6 +117,24 @@ class EmailReader:
 
         # No email found or no code found in the email body
         return None
+
+
+def get_code(email: str, password, delay: int = 0):
+    with EmailReader(
+        client="imap.rambler.ru",
+        email_address=email,
+        password=password,
+        delay=delay,
+        ) as reader:
+
+        msg = reader.get_code_from_email(
+            sender_email="account-security-noreply@accountprotection.microsoft.com",
+            criteria=MailCriteria.UNSEEN,
+        )
+
+        if msg: return msg
+
+        return
 
 
 if __name__ == "__main__":

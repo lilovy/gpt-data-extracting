@@ -81,6 +81,7 @@ class DBHelper:
         second_email: str = None,
         second_password: str = None,
         cookie: str = None,
+        user_agent: str = None,
         ):
         with self.__Session() as session:
             obj = BingCookie(
@@ -89,6 +90,7 @@ class DBHelper:
                 second_email=second_email,
                 second_password=second_password,
                 cookie=json.dumps(cookie),
+                user_agent=user_agent,
                 )
             session.add(obj)
             session.commit()
@@ -106,6 +108,22 @@ class DBHelper:
             {
                 "cookie": json.dumps(cookie), 
                 "timestamp": func.strftime("%s", datetime.utcnow()),
+            }
+        )
+        self.__session.commit()
+
+    def update_user_agent(
+        self,
+        email: str,
+        user_agent: str,
+        ):
+        update = self.__session.query(
+            BingCookie
+        ).filter(
+            BingCookie.email == email
+        ).update(
+            {
+                "user_agent": user_agent, 
             }
         )
         self.__session.commit()
@@ -137,11 +155,30 @@ class DBHelper:
         ).filter(
             BingCookie.email == email,
             BingCookie.timestamp > (func.strftime("%s", datetime.utcnow()) - 1500)
-        ).all()
+        ).first()
         if query:
-            cookies = [json.loads(q.cookie) for q in query if q.cookie]
-            if len(cookies) > 0:
-                return cookies
+            if query.cookie:
+                cookies = json.loads(query.cookie)
+                if cookies:
+                    if len(cookies) > 0:
+                        return cookies
+        return
+    
+    def get_cookie(
+        self,
+        email: str,
+    ):
+        query: BingCookie = self.__session.query(
+            BingCookie
+        ).filter(
+            BingCookie.email == email,
+        ).first()
+        if query:
+            if query.cookie:
+                cookies = json.loads(query.cookie)
+                if cookies:
+                    if len(cookies) > 0:
+                        return cookies
         return
 
     def get_emails(
@@ -154,29 +191,40 @@ class DBHelper:
 
     def get_auth_data(
         self,
-        email: str = None) -> list[dict]:
+        email: str) -> dict:
         if email:
-            query = self.__session.query(
+            q = self.__session.query(
                 BingCookie
             ).filter(
                 BingCookie.email == email,
-            ).all()
+            ).first()
         else:
-            query = self.__session.query(
+            q = self.__session.query(
                 BingCookie
             ).all()
+        if q:
+            q: BingCookie
+            dct = {
+                "email": q.email,
+                "password": q.password,
+                "second_email": q.second_email,
+                "second_password": q.second_password,
+                "user_agent": q.user_agent,
+            }
+            return dct
+        return
+    
+    def get_user_agent(
+        self,
+        email: str
+    ):
+        query: BingCookie = self.__session.query(
+            BingCookie
+        ).filter(
+            BingCookie.email == email
+        ).first()
         if query:
-            res = []
-            for q in query:
-                q: BingCookie
-                dct = {
-                    "email": q.email,
-                    "password": q.password,
-                    "second_email": q.second_email,
-                    "second_password": q.second_password,
-                }
-                res.append(dct)
-            return res
+            return query.user_agent
         return
 
     def get_stale_cookies(self) -> list[dict]:
@@ -238,5 +286,6 @@ class BingCookie(Base):
     password = Column(String, nullable=False)
     second_email = Column(String)
     second_password = Column(String)
+    user_agent = Column(String)
     cookie = Column(Text)
     timestamp = Column(Integer, default=func.strftime("%s", datetime.utcnow()))

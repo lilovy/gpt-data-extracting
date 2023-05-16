@@ -20,9 +20,11 @@ api_tokens = [
     api_token2,
 ]
 
-proxy_file = 'resources\proxies\\bing_proxy.txt'
+proxy_file = 'resources\proxies\\bing.txt'
 proxies = proxy_from_file(proxy_file)
 
 tok_prx = list(zip(tokens, proxies))
 
 api_prx = list(zip(api_tokens, proxies))
+
+base_proxy_dir = "resources/proxies/credential/"

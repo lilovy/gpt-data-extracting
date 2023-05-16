@@ -1,5 +1,5 @@
 import openai
-from random import sample
+from random import sample, choice
 from time import sleep
 import asyncio
 import chardet
@@ -7,7 +7,7 @@ import json
 import re
 import unicodedata
 
-from config import proxy_file
+from config import proxy_file,base_proxy_dir
 from .prompt_loader import LoadPrompt
 from .proxy import get_proxy, proxy_from_file
 from .data_transform import FindDict
@@ -15,9 +15,12 @@ from ..V1.markupGPT import MarkupGPT
 from ..V1.edgeGPT import BingGPT
 from .tokenizer import num_tokens_from_string as token_sum
 from .get_cookie import get_cookie
+from .cookie_extract import CookieExtractor
+from .data_loader import load_ua
 from ..database.init_database import DB
 from ..database.DBHelper import BingData, ResultData
 from .timer import timer
+from .proxynator import Proxynator
 
 
 class GPTResponser(object):
@@ -84,8 +87,8 @@ def get_ids_texts(data: list[tuple]):
     return ids, texts
 
 def combine(token, proxy):
-    n = 20
-    ns = 5000
+    n = 10
+    ns = 10000
     prompt = LoadPrompt('prompts/prompt_extract_data.txt').to_str
     proxy = 'http://' + proxy
     num = n
@@ -269,80 +272,110 @@ async def bing_combine(cookies: dict, proxy: str):
             else:
                 print(e)
 
-def get_cookies(email: str):
-    auth_data = DB.get_auth_data(email)[0]
-    cookie = get_cookie(**auth_data)
+def get_cookies(
+    email: str,
+    bing_proxy: str,
+    login_proxy: str,
+    ):
+    p_dir = base_proxy_dir + email
+    proxy_path = Proxynator(
+        p_dir,
+        login_proxy, 
+        bing_proxy,
+        ).create_schema().file_path
+    auth_data = DB.get_auth_data(email)
+    cookie = CookieExtractor(
+        **auth_data,
+        timeout=2,
+        proxy_path=proxy_path,
+        ).parse()
+    print(cookie)
     DB.update_bing_cookie(email, cookie)
-    cookie = json.dumps(cookie)
-    return cookie
+    return DB.get_cookie(email)
 
-async def bing_req(email: str, proxy: str):
+async def bing_req(
+    email: str,
+    bing_proxy: str,
+    login_proxy: str,
+    ):
     n = 10
-    ns = 5000
+    ns = 10000
     num = n
     prmt = LoadPrompt('prompts/prompt_extract_data.txt').to_str
-    proxy = 'http://' + proxy
-    cookie = DB.get_fresh_cookie(email)
+
+    proxy = 'http://' + bing_proxy
+    cookie = DB.get_cookie(email)
 
     if not cookie:
-    #     auth_data = DB.get_auth_data(email)[0]
-    #     cookie = get_cookies(**auth_data)
-    #     DB.update_bing_cookie(email, cookie)
-    #     cookie = json.dumps(cookie)
-    # else:
-    #     cookie = cookie[0]
-        cookie = get_cookies(email)
+        try:
+            cookie = get_cookies(
+                email,
+                bing_proxy,
+                login_proxy,
+            )
+        except Exception as e:
+            print(f"cookie: {e}")
 
+    try:
+        bot = BingGPT(cookie, proxy)
 
-    # print(type(cookie))
-    # return
-    bot = BingGPT(cookie, proxy)
-    data = sample(DB.get_raw_data(ns), num)
+        data = sample(DB.get_raw_data(ns), num)
 
-    if len(data) > 0:
-        ids, texts = get_ids_texts(data)
-        str_data = str(texts)
-        prompt = prmt + str_data
-
-        while len(prompt) > 2000:
-            num -= 1
-            data = sample(DB.get_raw_data(ns), num)
+        if len(data) > 0:
             ids, texts = get_ids_texts(data)
             str_data = str(texts)
             prompt = prmt + str_data
-        print(len(prompt), num, proxy)
 
-        try:
-            task = asyncio.create_task(bot.ask(prompt))
-            response: str = await task
-            if "\\xa0" in response:
-                print('xa0 detect')
-                response = response.replace("\\xa0", "\u00A0")
-            dicts = FindDict(response)
+            while len(prompt) > 2000:
+                num -= 1
+                data = sample(DB.get_raw_data(ns), num)
+                ids, texts = get_ids_texts(data)
+                str_data = str(texts)
+                prompt = prmt + str_data
+            print(len(prompt), num, proxy)
 
-            if len(dicts) != num:
-                # print(response)
-                print('info is lost')
-            else:
-                result = list(zip(ids, dicts))
-                DB.insert_result_data(result, BingData)
+            try:
+                task = asyncio.create_task(bot.ask(prompt))
+                response: str = await task
+                if "\\xa0" in response:
+                    print('xa0 detect')
+                    response = response.replace("\\xa0", "\u00A0")
+                dicts = FindDict(response)
 
-        except Exception as e:
-            if str(e) in ("'messages'", "'text"):
-                print(f"Error: {e}")
-                sleep(600)
-            else:
+                if len(dicts) != num:
+                    # print(response)
+                    print('info is lost')
+                else:
+                    result = list(zip(ids, dicts))
+                    DB.insert_result_data(result, BingData)
+
+            except BaseException as e:
+                # if str(e) in ("'messages'", "'text"):
+                #     print(f"Error: {e}")
+
+                #     sleep(600)
+                # else:
+                #     print(e)
                 print(e)
-                get_cookies(email)
+    except Exception as e:
+        print(e)
+        try:
+            get_cookies(
+                email, 
+                bing_proxy,
+                login_proxy,
+            )
+        except Exception as e:
+            print(e)
 
 # def bing_loop(cookies: dict, proxy: str):
 #     while True:
 #         asyncio.run(bing_req(cookies, proxy))
 #         sleep(1)
 
-def bing_loop(mail: str, proxy: str):
+def bing_loop(mail: str, bing: str, login: str):
     while True:
-        asyncio.run(bing_req(mail, proxy))
+        asyncio.run(bing_req(mail, bing, login))
         sleep(1)
 
 def start_bing(cookies: dict, proxy: str):

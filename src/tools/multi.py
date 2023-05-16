@@ -46,10 +46,11 @@ def thr_bing(
     func, data = data
     for d in data:
         mail = d.get('mail')
-        proxy = d.get('proxy')
-        t = tr.Thread(target=func, args=(mail, proxy))
+        bing = d.get('bing')
+        login = d.get('login')
+        t = tr.Thread(target=func, args=(mail, bing, login))
         processes.append(t)
         t.start()
-    
+
     for t in processes:
         t.join()

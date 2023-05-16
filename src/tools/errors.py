@@ -1,0 +1,4 @@
+
+
+class BingError(Exception):
+    pass

@@ -1,17 +1,17 @@
 import pickle
 import json
 # from src.tools import timer
-from .timer import timer
+# from .timer import timer
 import pandas as pd
 from pandas import DataFrame
 
-@timer
+# @timer
 def load_pkl(file):
     with open(file, 'rb') as f:
         data = pickle.load(f)
     return data
 
-@timer
+# @timer
 def load_pandas_pkl(file) -> DataFrame:
     df = pd.read_pickle(file)
     return df
@@ -24,6 +24,10 @@ def load_cookies(file) -> list[dict]:
     with open(file, 'r') as f:
         cookies = json.load(f)
     return cookies
+
+def load_ua(file) -> list:
+    with open(file) as f:
+        return json.load(f)
 
 def proxy_loader():
     pass
