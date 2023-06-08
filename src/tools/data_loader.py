@@ -29,11 +29,20 @@ def load_ua(file) -> list:
     with open(file) as f:
         return json.load(f)
 
-def proxy_loader():
-    pass
+def load_token(filepath: str):
+    with open(filepath) as f:
+        return [line.replace('\n', '') for line in f.readlines() if len(line) > 1]
+
+def load_proxy(filepath: str) -> str:
+    with open(filepath) as f:
+        return [line.strip().replace('\n', '') for line in f.readlines() if len(line) > 0]
+    #     proxies = f.read().split('\n')
+    # return proxies
 
 if __name__ == "__main__":
-    data = load_pkl('.localdata/data_500k.pkl')
+    # data = load_pkl('.localdata/data_500k.pkl')
+    # print(load_proxy(r'resources\proxies\proxy.txt'))
+    print(load_token(r"resources\chatgpt_tokens\tokens.txt"))
     # print(data[220100:220310])
-    print(len(data))
+    # print(len(data))
     # print(data.head(50))

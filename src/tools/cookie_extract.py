@@ -345,8 +345,6 @@ class CookieExtractor(object):
             chat = self.__session()
             # print('chat')
             if chat:
-                # self.driver.quite()
-                # print(self.get_cookie)
                 return self.get_cookie
         raise Exception("Login error!")
 

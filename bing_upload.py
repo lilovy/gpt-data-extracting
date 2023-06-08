@@ -1,4 +1,6 @@
 from src.database.init_database import DB
+from src.tools.data_loader import load_ua
+from random import choice
 
 
 def load(file):
@@ -17,10 +19,11 @@ def load(file):
         # data = [(d.split(':')) for d in data if len(d) != 0]
         return res
 
-def upload(email: str, password: str, second_email: str = None, second_password: str = None):
-    DB.add_bind_session(email, password, second_email, second_password)
+def upload(email: str, password: str, second_email: str = None, second_password: str = None, ua: str = None):
+    DB.add_bind_session(email, password, second_email, second_password, user_agent=ua)
 
 
 if __name__ == "__main__":
+    ua_file = r"resources\user-agents\bing_user_agents.json"
     for d_args in load("resources\mails/bing_mail.txt"):
-        upload(**d_args)
+        upload(**d_args, ua=choice(load_ua(ua_file)))

@@ -1,13 +1,15 @@
-from src.tools.multi import thr_bing
-from src.tools.extractor import bing_loop
+from src.tools.multi import thr_bing, thr_bing_queue
+from src.tools.bing_extractor import bing_loop
 from src.tools.data_loader import load_cookies
 from src.tools.proxy import proxy_from_file
 from src.database.init_database import DB
 import threading as tr
+from queue import Queue
 
 
 bing_proxy = "resources\proxies\\bing.txt"
 login_proxy = "resources\proxies\\login.txt"
+
 
 
 if __name__ == "__main__":
@@ -32,10 +34,24 @@ if __name__ == "__main__":
         )
     ]
 
-    # print(mail_proxy)
+    queue = Queue()
+    for d in mail_proxy:
+        queue.put(d)
 
-    # bing_loop(**mail_proxy[0])
+    threads = []
+    for _ in range(len(bing_p)):
+        t = tr.Thread(
+            target=bing_loop,
+            args=(queue,)
+        )
+        threads.append(t)
+        t.start()
+    
+    for t in threads:
+        t.join()
 
 
-    data = (bing_loop, mail_proxy)
-    thr_bing(data=data)
+
+
+    # thr_bing(bing_loop, data=data)
+    # thr_bing_queue(bing_loop, mail_proxy)

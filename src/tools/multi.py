@@ -1,5 +1,6 @@
 import multiprocessing as mp
 import threading as tr
+from queue import Queue
 
 
 
@@ -27,28 +28,61 @@ def mlt(
         p.join()
 
 def thr(
-    data: list[tuple[object, list[tuple]]],
+    func,
+    data: list[tuple],
 ):
     processes = []
-    for func, tok_prx in data:
-        for args in tok_prx:
-            t = tr.Thread(target=func, args=args)
-            processes.append(t)
-            t.start()
-    
+    for args in data:
+        t = tr.Thread(target=func, args=args)
+        processes.append(t)
+        t.start()
+    # for func, tok_prx in data:
+    #     for args in tok_prx:
+
     for t in processes:
         t.join()
 
 def thr_bing(
-    data: tuple[object, list[dict]]
+    func,
+    data: list[dict],
+    # data: tuple[object, list[dict]]
 ):
     processes = []
-    func, data = data
+    # func, data = data
     for d in data:
         mail = d.get('mail')
         bing = d.get('bing')
         login = d.get('login')
         t = tr.Thread(target=func, args=(mail, bing, login))
+        processes.append(t)
+        t.start()
+
+    for t in processes:
+        t.join()
+
+def thr_bing_queue(
+    # data: tuple[object, list[dict]],
+    func,
+    data: list[dict],
+    tr_num: int = 2,
+):
+    queue = Queue()
+    # func, data = data
+    for d in data:
+        queue.put(
+            (
+                d.get("mail"),
+                d.get("bing"),
+                d.get("login"),
+            )
+        )
+    
+    processes = []
+    for _ in range(tr_num):
+        # mail = d.get('mail')
+        # bing = d.get('bing')
+        # login = d.get('login')
+        t = tr.Thread(target=func, args=(queue,))
         processes.append(t)
         t.start()
 

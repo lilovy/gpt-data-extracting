@@ -103,30 +103,46 @@ def combine(token, proxy):
             data = sample(DB.get_raw_data(ns), num)
             ids, texts = get_ids_texts(data)
             str_data = str(texts)
+
         print(len(texts), proxy)
 
         try:
             resp = GPTResponser(token, prompt=prompt, proxy=proxy).ask(str_data)
+
             if "\\xa0" in resp:
                 print('xa0 detect')
                 resp = resp.replace("\\xa0", "\u00A0")
 
             dicts = FindDict(resp)
-            if len(dicts) != num:
-                print('info is lost')
-            else:
+            if len(dicts) == num:
                 result = list(zip(ids, dicts))
-                DB.insert_result_data(result, ResultData)
+                try:
+                    DB.insert_result_data(result, ResultData)
+                    print("Data successfully uploaded")
+                except Exception as e:
+                    print(e)
+            elif len(dicts) != num:
+                print('info is lost')
+            # else:
+            # print(resp)
 
         except Exception as e:
-            print(e)
             # print(resp)
-            sleep(600)
-            pass
+            if "code: 429" in str(e) or "code: 524" in str(e):
+                print(e, f"Token: <{token}>", sep=" <----> ")
+                print("Sleep")
+                sleep(600)
+            # elif "Expecting" in str(e):
+            #     print(resp)
+            elif "code: 500" in str(e):
+                print(e)
+                sleep(300)
+            else:
+                print(e)
 
         data = sample(DB.get_raw_data(ns), num)
         num = n
-        # break
+
 
 def msg(prompt):
     return [
@@ -277,21 +293,24 @@ def get_cookies(
     bing_proxy: str,
     login_proxy: str,
     ):
-    p_dir = base_proxy_dir + email
-    proxy_path = Proxynator(
-        p_dir,
-        login_proxy, 
-        bing_proxy,
-        ).create_schema().file_path
-    auth_data = DB.get_auth_data(email)
-    cookie = CookieExtractor(
-        **auth_data,
-        timeout=2,
-        proxy_path=proxy_path,
-        ).parse()
-    print(cookie)
-    DB.update_bing_cookie(email, cookie)
-    return DB.get_cookie(email)
+    cookie = DB.get_cookie(email)
+    if not cookie:
+        p_dir = base_proxy_dir + email
+        proxy_path = Proxynator(
+            p_dir,
+            login_proxy, 
+            bing_proxy,
+            ).create_schema().file_path
+        auth_data = DB.get_auth_data(email)
+        cookie = CookieExtractor(
+            **auth_data,
+            timeout=2,
+            proxy_path=proxy_path,
+            ).parse()
+        # print(cookie)
+        DB.update_bing_cookie(email, cookie)
+        cookie = DB.get_cookie(email)
+    return cookie
 
 async def bing_req(
     email: str,
@@ -304,17 +323,17 @@ async def bing_req(
     prmt = LoadPrompt('prompts/prompt_extract_data.txt').to_str
 
     proxy = 'http://' + bing_proxy
-    cookie = DB.get_cookie(email)
+    # cookie = DB.get_cookie(email)
 
-    if not cookie:
-        try:
-            cookie = get_cookies(
-                email,
-                bing_proxy,
-                login_proxy,
-            )
-        except Exception as e:
-            print(f"cookie: {e}")
+    # if not cookie:
+    try:
+        cookie = get_cookies(
+            email,
+            bing_proxy,
+            login_proxy,
+        )
+    except Exception as e:
+        print(f"cookie: {e}")
 
     try:
         bot = BingGPT(cookie, proxy)
@@ -350,28 +369,15 @@ async def bing_req(
                     DB.insert_result_data(result, BingData)
 
             except BaseException as e:
-                # if str(e) in ("'messages'", "'text"):
-                #     print(f"Error: {e}")
+                if str(e) in ("'messages'", "'text'"):
+                    print(f"Error: {e}")
 
-                #     sleep(600)
-                # else:
-                #     print(e)
-                print(e)
+                    sleep(600)
+                else:
+                    print(e)
     except Exception as e:
         print(e)
-        try:
-            get_cookies(
-                email, 
-                bing_proxy,
-                login_proxy,
-            )
-        except Exception as e:
-            print(e)
 
-# def bing_loop(cookies: dict, proxy: str):
-#     while True:
-#         asyncio.run(bing_req(cookies, proxy))
-#         sleep(1)
 
 def bing_loop(mail: str, bing: str, login: str):
     while True:
