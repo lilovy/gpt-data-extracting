@@ -174,10 +174,10 @@ def get_cookie(email: str, password: str, second_email: str, second_password: st
       
 
 if __name__ == '__main__':
-    user = 'conclemnae@outlook.com'
-    password = 'g2vMOUxhLn'
-    second_email = 'spadgerthankpa1999@ro.ru'
-    second_password = 'sdWj8ixDA'
+    user = 'mail@outlook.com'
+    password = 'pass123'
+    second_email = 'mail@ro.ru'
+    second_password = 'pass123'
     cookie = get_cookie(user, password, second_email, second_password)
     print(cookie)
 

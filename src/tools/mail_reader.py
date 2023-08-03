@@ -143,10 +143,6 @@ if __name__ == "__main__":
         email_address="mail@rambler.ru", 
         password="password",
         ) as reader:
-        # body = reader.get_latest_email_body(
-        #     sender_email="account-security-noreply@accountprotection.microsoft.com",
-        #     criteria=MailCriteria.ALL,
-        #     )
         body = reader.get_code_from_email(
             sender_email="account-security-noreply@accountprotection.microsoft.com",
             )

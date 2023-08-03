@@ -354,10 +354,10 @@ class CookieExtractor(object):
 
 
 if __name__ == "__main__":
-    email = 'conclemnae@outlook.com'
-    password = 'g2vMOUxhLn'
-    second_email = 'spadgerthankpa1999@ro.ru'
-    second_password = 'sdWj8ixDA'
+    email = 'mail@outlook.com'
+    password = 'pass123'
+    second_email = 'mail@ro.ru'
+    second_password = 'pass123'
     ua = load_ua('resources/user-agents/bing_user_agents.json')
     CookieExtractor(
         email,
